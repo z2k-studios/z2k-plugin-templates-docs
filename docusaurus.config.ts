@@ -15,17 +15,21 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://your-docusaurus-site.example.com',
+  url: 'https://z2k-studios.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
+  baseUrl: '/z2k-plugin-templates-docs/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'facebook', // Usually your GitHub org/user name.
-  projectName: 'docusaurus', // Usually your repo name.
+  organizationName: 'z2k-studios',
+  projectName: 'z2k-plugin-templates-docs',
 
-  onBrokenLinks: 'throw',
+  // Git Hub config
+  deploymentBranch: 'gh-pages',
+  trailingSlash: false, // optional, removes trailing slashes in URLs
+
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
