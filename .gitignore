@@ -1,0 +1,32 @@
+# Ignore the docs folder (synced from source)
+docs/
+
+# Node modules
+node_modules/
+
+# Docusaurus build output
+build/
+.docusaurus/
+
+# Dependency lockfiles (optional)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Local env files or credentials
+.env
+.env.local
+.env.*.local
+
+# VSCode and system files
+.vscode/
+.DS_Store
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS junk
+Thumbs.db
+
