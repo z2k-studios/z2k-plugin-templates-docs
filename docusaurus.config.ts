@@ -1,6 +1,7 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import slugify from 'slugify';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -25,7 +26,7 @@ const config: Config = {
   organizationName: 'z2k-studios',
   projectName: 'z2k-plugin-templates-docs',
 
-  // Git Hub config
+  // GitHub config
   deploymentBranch: 'gh-pages',
   trailingSlash: false, // optional, removes trailing slashes in URLs
 
@@ -54,17 +55,32 @@ const config: Config = {
             [
               require('remark-wiki-link'),
               {
-                // Resolves [[My Page]] to the filename 'My Page.md'
-              pageResolver: (name) => [name],
+                // Convert [[My Page]] to the corresponding sluggified filename
+                pageResolver: (name: string) => {
+                  // Split out any anchor
+                  const [pageName] = name.split('#');
+                  const slug = slugify(pageName, { lower: true, strict: true });
+                  return [slug];
+                },
+                // Generate relative link path
+                hrefTemplate: (permalink, page = '') => {
+                  const [pageName, hash] = page.split('#');
+                  const slug = slugify(pageName, { lower: true, strict: true });
+                  const anchor = hash ? `#${slugify(hash, { lower: true, strict: true })}` : '';
+                  return `./${slug}${anchor}`;
+                },
 
-              // Turns [[My Page]] → ./My%20Page
-              hrefTemplate: (permalink) => 
-                  './' + encodeURIComponent(permalink).replace(/%2F/g, '/'),
+/*                hrefTemplate: (permalink) =>
+                  './' + permalink, // + '.md', // Commented out the extension so that docusaurus can add it.
+*/
+                // Optional: display the title from YAML if you want smart display names
+                aliasDivider: '|', // Allow [[slug|Custom Title]] if you want to override display manually
               },
             ],
           ],
         },
-        blog: {
+        blog: false,
+        /*{
           showReadingTime: true,
           feedOptions: {
             type: ['rss', 'atom'],
@@ -78,7 +94,7 @@ const config: Config = {
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
-        },
+        },*/
         theme: {
           customCss: './src/css/custom.css',
         },

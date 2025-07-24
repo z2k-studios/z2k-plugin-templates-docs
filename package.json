@@ -3,7 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "sync-docs": "zsh sync-docs.sh",
+    "z2k-sync-docs": "zsh 1-sync-docs.sh",
+    "z2k-build": "zsh 2-build.sh",
+    "z2k-test": "zsh 3-test.sh",
+    "z2k-deploy": "zsh 4-deploy.sh",
+    "z2k-clean": "zsh 5-clean.sh",
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "build": "docusaurus build",
@@ -23,7 +27,8 @@
     "prism-react-renderer": "^2.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "remark-wiki-link": "^2.0.1"
+    "remark-wiki-link": "^2.0.1",
+    "slugify": "^1.6.6"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.8.1",
