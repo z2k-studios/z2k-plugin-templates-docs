@@ -79,8 +79,7 @@ const config: Config = {
             ],
           ],
         },
-        blog: false,
-        /*{
+        blog: {
           showReadingTime: true,
           feedOptions: {
             type: ['rss', 'atom'],
@@ -88,13 +87,13 @@ const config: Config = {
           },
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+          // editUrl:
+          //  'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
-        },*/
+        },
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -106,17 +105,17 @@ const config: Config = {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
-      title: 'My Site',
+      title: 'Z2K Templates Obsidian Plugin',
       logo: {
-        alt: 'My Site Logo',
-        src: 'img/logo.svg',
+        alt: 'Z2K System Logo',
+        src: 'img/z2k-system.png', // <-- Set your PNG logo here
       },
       items: [
         {
           type: 'docSidebar',
           sidebarId: 'z2k-templates-docs',
           position: 'left',
-          label: 'Z2K Templates Docs',
+          label: 'Docs',
         },
         {to: '/blog', label: 'Blog', position: 'left'},
         {
@@ -169,7 +168,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Z2K Studios LLC.`,
     },
     prism: {
       theme: prismThemes.github,

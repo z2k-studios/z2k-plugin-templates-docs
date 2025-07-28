@@ -1,0 +1,19 @@
+hello:
+  label: Hello
+  permalink: /hello
+  description: Hello tag description
+
+best-practices:
+  label: Best Practices
+  permalink: /best-practices
+  description: Best Practices for using Z2K Templates
+
+new-features:
+  label: New Features
+  permalink: /new-features
+  description: New Features released in Z2K Templates
+
+release-notes:
+  label: Release Notes
+  permalink: release-notes
+  description: Release Notes for updates to the Z2K Templates plugin
