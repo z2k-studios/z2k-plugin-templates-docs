@@ -273,6 +273,11 @@ export function buildIndex(src: string): Index {
     // output status
     utils.verboseLog(`Index built with ${files.length} files and ${folders.length} folders.`);
 
+    // output the index to the console for debugging
+    if (utils.VERBOSE) {
+      console.log(JSON.stringify({ files, folders }, null, 2));
+    }
+
     // Return the complete index
     return { files, folders, fileTitleMap, fileSlugMap, fileNameMap };
 }

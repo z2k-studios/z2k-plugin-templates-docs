@@ -150,17 +150,17 @@ c. Fix any other Obsidian specific syntax or features
 ---
 
 ### 5. Set Output Permissions
-	•	Make all copied .md files read-only:
+- Make all copied .md files read-only:
 
 ```bash
 chmod a-w target.md
 ```
 
 ### 6. Log Summary
-	•	Output a summary table of:
-        •	Number of files copied
-        •	Number of wikilinks rewritten
-        •	Any unresolved links (warnings)
-        •	Title-to-path map (for debug)
+- Output a summary table of:
+    - Number of files copied
+    - Number of wikilinks rewritten
+    - Any unresolved links (warnings)
+    - Title-to-path map (for debug)
 
 

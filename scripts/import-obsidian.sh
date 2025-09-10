@@ -60,6 +60,7 @@ if $INSTALL_MODE; then
     remark-parse
     remark-stringify
     unist-util-visit
+    unified remark remark-parse remark-stringify unist-util-visit
   )
 
   echo "🔍 Checking for required npm packages..."
