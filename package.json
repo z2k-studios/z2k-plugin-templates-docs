@@ -28,7 +28,6 @@
     "prism-react-renderer": "^2.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "remark-wiki-link": "^2.0.1",
     "slugify": "^1.6.6",
     "ts-node": "^10.9.2"
   },

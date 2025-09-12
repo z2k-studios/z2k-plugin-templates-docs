@@ -59,8 +59,8 @@ if $INSTALL_MODE; then
     unified
     remark-parse
     remark-stringify
-    unist-util-visit
-    unified remark remark-parse remark-stringify unist-util-visit
+    unist unist-util-visit
+    unified remark remark-parse remark-stringify
   )
 
   echo "🔍 Checking for required npm packages..."
@@ -94,8 +94,10 @@ echo "▶️ Running import-obsidian.ts with args: $@"
 cd "$ROOT_DIR"
 if $DEBUG_MODE; then
   echo "Current directory: $(pwd)"
-  echo "Debug mode enabled. Running with ts-node in debug mode..."
-  npx ts-node --esm "$TS_SCRIPT" "$@"
+  echo "Debug mode enabled. Running with tsx in debug mode..."
+  npx tsx --inspect "$TS_SCRIPT" "$@"
+  # echo "Debug mode enabled. Running with ts-node in debug mode..."
+  # npx ts-node --esm "$TS_SCRIPT" "$@"
   # node --inspect ./node_modules/.bin/ts-node "$TS_SCRIPT" "$@"
 else
   # npx ts-node --loader ts-node/esm "$TS_SCRIPT" "$@" 

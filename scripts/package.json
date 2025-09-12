@@ -4,6 +4,7 @@
   "typecheck": "tsc",
   "main": "import-obsidian.ts",
   "dependencies": {
+    "@flowershow/remark-wiki-link": "^2.0.4",
     "fs-extra": "^11.3.0",
     "gray-matter": "^4.0.3",
     "remark-parse": "^11.0.0",

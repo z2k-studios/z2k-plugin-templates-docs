@@ -274,7 +274,7 @@ export function buildIndex(src: string): Index {
     utils.verboseLog(`Index built with ${files.length} files and ${folders.length} folders.`);
 
     // output the index to the console for debugging
-    if (utils.VERBOSE) {
+    if (utils.DEBUG) {
       console.log(JSON.stringify({ files, folders }, null, 2));
     }
 

@@ -1,11 +1,11 @@
 import fs from 'fs-extra';
-import { Index, Summary } from './types';
-import * as utils from './utils'
-import * as step1 from './step1-cleanTargetFolder';
-import * as step2 from './step2-buildIndex';
-import * as step3 from './step3-createDocsTree';
-import * as step4 from './step4-remarkFiles';
-import * as step5 from './step5-summarize';
+import { Index, Summary } from './types.ts';
+import * as utils from './utils.ts'
+import * as step1 from './step1-cleanTargetFolder.ts';
+import * as step2 from './step2-buildIndex.ts';
+import * as step3 from './step3-createDocsTree.ts';
+import * as step4 from './step4-remarkFiles.ts';
+import * as step5 from './step5-summarize.ts';
 
 
 // ====================================================================================================

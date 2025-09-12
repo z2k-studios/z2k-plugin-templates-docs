@@ -3,7 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import { unified, Plugin } from 'unified';
 import remarkParse from 'remark-parse';
-import remarkWikiLink from 'remark-wiki-link';
+import wikiLinkPlugin from '@flowershow/remark-wiki-link';
 import remarkStringify from 'remark-stringify';
 import { visit } from 'unist-util-visit';
 
@@ -24,11 +24,18 @@ import * as utils from './utils.ts'
  */
 export async function copyAndTransformFiles(index: Index, summary: Summary) {
 
+  // Build out the permalinks array for the wiki-link plugin
+  const permalinks = buildPermalinksArray(index);
+  utils.verboseLog(`Built ${permalinks.length} permalinks for wiki-link plugin`);
+
+  // Optionally warn on basename collisions
+  warnOnBasenameCollisions(index);
+
   // If debug mode, only process the first file for faster iteration
   if (utils.DEBUG) {
     if (index.files.length > 0) {
       utils.verboseLog('DEBUG mode - processing only first file for faster iteration');
-      await copyAndTransformAFile(index.files[0], index, summary);
+      await copyAndTransformAFile(index.files[0], permalinks, summary);
     }
     return;
   }
@@ -36,7 +43,7 @@ export async function copyAndTransformFiles(index: Index, summary: Summary) {
   // Step through each file in the index
   // --------------------------------------------------------------------------------------------------
   for (const file of index.files) {
-    await copyAndTransformAFile(file, index, summary);
+    await copyAndTransformAFile(file, permalinks, summary);
   }
 }
 
@@ -46,7 +53,8 @@ export async function copyAndTransformFiles(index: Index, summary: Summary) {
 // -----------------------------------------------------------------------------
 // Helper: process a single file
 // Note: this function is async because it uses await for the remark processing
-async function copyAndTransformAFile(file: Index['files'][number], index: Index, summary: Summary) {
+async function copyAndTransformAFile(file: Index['files'][number], permalinks: string[] , summary: Summary) {
+
   // Construct the destination file path
   const destFilePath = path.join(utils.DEST, file.destDir, file.destSlug);
 
@@ -75,72 +83,19 @@ async function copyAndTransformAFile(file: Index['files'][number], index: Index,
       .use(remarkParse)
       //.use(remarkFrontmatter) // Parse YAML frontmatter - useful if we needed to set YAML properties
       //.use(remarkGfm) // GitHub Flavored Markdown - but since Obsidian is already mostly GFM compliant, this is skipped here
-      .use(remarkWikiLink, {
-        pageResolver: (name: any) => {
-          if (!name || typeof name !== 'string') {
-            utils.verboseLog(`remarkWikiLink.pageResolver called with invalid name: ${String(name)} (file: ${file.sourcePath})`);
-            // Quick scan for potentially malformed wikilinks in this file content
-            try {
-              const bad: string[] = [];
-              const wikire = /\[\[\s*([^|\]#]*)\s*(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]/g;
-              let m: RegExpExecArray | null;
-              while ((m = wikire.exec(content)) !== null && bad.length < 10) {
-                bad.push(m[0]);
-              }
-              if (bad.length) {
-                utils.verboseLog(`Potential malformed wikilinks in ${utils.cleanFolderNamesForConsoleOutput(file.sourcePath)}: ${bad.join('; ')}`);
-              }
-            } catch (e) {
-              utils.verboseLog(`Error scanning content for wikilinks: ${String(e)}`);
-            }
-            return [];
-          }
+      .use(wikiLinkPlugin, {
+        // Obsidian uses "|" as the alias divider by default
+        aliasDivider: "|",
+        format: "regular", //"shortestPossible",
+        // permalinks,
+        newClassName: "unResolved", // add a class for any unresolved links (NOTE: useless as we are not outputting HTML)
+      })
 
-          utils.verboseLog(`remarkWikiLink.pageResolver processing name: "${name}" (file: ${file.sourcePath})`);
-          const result = lookupPageInIndex(name, index);
-          if (result) {
-            utils.verboseLog(`Resolved wikilink "${name}" → ${result}`);
-            incrementRefCount(result, index);
-            return [result];
-          } else {
-            utils.verboseLog(`Could not resolve wikilink: "${name}" (file: ${file.sourcePath})`);
-            return [];
-          }
-        },
-        hrefTemplate: ({ page, alias, hash} : { page?: string, alias?: string, hash?: string }) => {
-          const candidate = (page && typeof page === 'string') ? page : (alias && typeof alias === 'string' ? alias : undefined);
-          if (!candidate) {
-            utils.verboseLog(`remarkWikiLink.hrefTemplate called with invalid args: page=${String(page)}, alias=${String(alias)}, hash=${String(hash)} (file: ${file.sourcePath})`);
-            // Attempt to locate wikilink occurrences in the file for diagnostics (include line numbers and surrounding text)
-            try {
-              const matches: Array<{text:string, index:number, line:number, lineText:string}> = [];
-              const wikireAll = /\[\[([^\]]*)\]\]/g;
-              let mm: RegExpExecArray | null;
-              const lines = content.split(/\r?\n/);
-              while ((mm = wikireAll.exec(content)) !== null && matches.length < 50) {
-                const text = mm[0];
-                const idx = mm.index || 0;
-                const line = content.slice(0, idx).split(/\r?\n/).length;
-                const lineText = lines[line - 1] || '';
-                matches.push({ text, index: idx, line, lineText });
-              }
-              if (matches.length) {
-                utils.verboseLog(`Found wikilinks in file ${utils.cleanFolderNamesForConsoleOutput(file.sourcePath)}: ${matches.map(m => `${m.text}@L${m.line}`).slice(0,10).join('; ')}`);
-                matches.slice(0,5).forEach(m => utils.verboseLog(`  ${m.text} at line ${m.line}: ${m.lineText.trim()}`));
-              } else {
-                utils.verboseLog(`No explicit [[..]] wikilinks found in file ${utils.cleanFolderNamesForConsoleOutput(file.sourcePath)}`);
-              }
-            } catch (e) {
-              utils.verboseLog(`Error scanning content for wikilinks: ${String(e)}`);
-            }
-            return './404-not-found';
-          }
-          const resolvedPath = lookupPagePathInIndex(candidate, index);
-          return hash ? `${resolvedPath}#${utils.sluggify(hash)}` : resolvedPath;
-        },
-    })
+      // More of my own custom plugins - if commented out, then please see below for reasons
       // .use(remarkObsidianLinks, { index, summary }). // if I need to implement my own wikilink transformations
-      .use(remarkObsidianCallout)
+      // .use(remarkObsidianCallout)
+      
+      // Now stringify back to markdown
       .use(remarkStringify)
       .process(content);
 
@@ -150,11 +105,66 @@ async function copyAndTransformAFile(file: Index['files'][number], index: Index,
     fs.chmodSync(destFilePath, 0o444); // read-only
     // utils.verboseLog(`Wrote and chmod 444: ${utils.cleanFolderNamesForConsoleOutput(destFilePath)}`);
     summary.filesCopied++;
+
   } else {
+
     // --- Media or other files: Copy as-is ---
     fs.copyFileSync(file.sourcePath, destFilePath);
     utils.verboseLog(`Copied media/other file: ${utils.cleanFolderNamesForConsoleOutput(file.sourcePath)} -> ${utils.cleanFolderNamesForConsoleOutput(destFilePath)}`);
     summary.filesCopied++;
+  }
+
+}
+
+// -----------------------------------------------------------------------------
+// --- Wiki-Link Plugin: build a permalink mapping list ---
+// -----------------------------------------------------------------------------
+
+/**
+ * Build the `permalinks` array for @flowershow/remark-wiki-link (format: "shortestPossible").
+ * Each permalink is a POSIX-style, extensionless path relative to your docs root,
+ * e.g. "guides/intro-to-the-system" or "index".
+ */
+export function buildPermalinksArray(index: Index): string[] {
+  const set = new Set<string>();
+
+  for (const f of index.files) {
+    // Only include markdown-like docs that become pages
+    const lowerExt = f.destSlug.toLowerCase();
+    if (!(lowerExt.endsWith(".md") || lowerExt.endsWith(".mdx"))) continue;
+
+    // Compose "destDir/destSlug" → make POSIX → strip extension
+    const rel = path
+      .posix
+      .join(f.destDir.replace(/\\/g, "/"), f.destSlug.replace(/\\/g, "/")) //convert all forward slashes to backslashes and remove double slashes
+      .replace(/\.(md|mdx)$/i, ""); // strip the extension
+
+    set.add(rel);
+  }
+
+  return Array.from(set).sort();
+}
+
+
+// -----------------------------------------------------------------------------
+// --- Wiki-Link Plugin: create warnings for basename collisions ---
+// -----------------------------------------------------------------------------
+/**
+ * Log potential ambiguity for shortest-possible resolution:
+ * same basename (e.g. "readme") living under multiple folders.
+ */
+export function warnOnBasenameCollisions(index: Index) {
+  const byBase = new Map<string, string[]>();
+  for (const f of index.files) {
+    const base = f.destSlug.replace(/\.(md|mdx)$/i, "").toLowerCase(); // e.g. "readme"
+    const full = path.posix.join(f.destDir.replace(/\\/g, "/"), base); // e.g. "guides/readme"
+    if (!byBase.has(base)) byBase.set(base, []);
+    byBase.get(base)!.push(full);
+  }
+  for (const [base, list] of byBase.entries()) {
+    if (list.length > 1) {
+      console.warn(`[wiki] basename collision for "${base}":\n  ${list.join("\n  ")}`);
+    }
   }
 }
 
@@ -205,6 +215,9 @@ function incrementRefCount(name: string, index: Index): void {
 // --- Remark Plugin: Obsidian Wikilinks & Syntax ---
 // -----------------------------------------------------------------------------
 // This is an AI generate wikilinks alternative plugin.
+// NOTE: This plugin code is CURRENTLY COMMENTED OUT in favor of using the wikiLinkPlus plugin above
+// because the wikiLinkPlus plugin handles more edge cases and is better maintained.
+// However, this custom plugin is kept here for reference and potential future use.
 function remarkObsidianLinks(options: { index: Index, summary: Summary }) {
   const { index } = options;
   return (tree: any) => {
@@ -276,6 +289,49 @@ function remarkObsidianLinks(options: { index: Index, summary: Summary }) {
 // -----------------------------------------------------------------------------
 // --- Remark Plugin: Obsidian Callouts / Admonitions ---
 // -----------------------------------------------------------------------------
+// NOTE: This plugin is currently INACTIVE after learning about:
+/**
+ * NOTE: Removing custom Remark callout handling in favor of a Rehype plugin inside Docusaurus.
+ *
+ * Why this change:
+ * 1) Correct layer of abstraction: callouts are ultimately HTML constructs (boxes, titles, icons).
+ *    Handling them in Rehype (HTML AST) matches the final output domain better than Remark (Markdown AST).
+ *    Docusaurus already runs a remark → rehype pipeline internally and supports rehype plugins in config.
+ *    Docs: https://docusaurus.io/docs/markdown-features/plugins
+ *
+ * 2) Maintenance & ecosystem alignment: the previously used Remark plugin has been deprecated/archived,
+ *    and the maintainer now maintains a Rehype version instead.
+ *    - Archived Remark plugin: https://github.com/escwxyz/remark-obsidian-callout
+ *    - Rehype plugin (current): https://github.com/lin-stephanie/rehype-callouts
+ *
+ * 3) Features & fidelity: the Rehype plugin provides HTML-level control (attributes/classes),
+ *    supports collapsible callouts via <details>, and avoids double-processing or divergence between
+ *    our preprocessor and Docusaurus’ own HTML generation.
+ *
+ * 4) Simpler pipeline: keep Obsidian-specific link rewrites in Remark (where appropriate),
+ *    but delegate callout rendering to Docusaurus’ rehype stage (configured in docusaurus.config.js).
+ *    If needed, see unified’s bridge for context: https://unifiedjs.com/explore/package/remark-rehype/
+ *
+ * Implementation note:
+ * - In docusaurus.config.js, add the rehype plugin, e.g.:
+ *     const rehypeCallouts = require("rehype-callouts");
+ *     // ...
+ *     presets: [
+ *       [
+ *         "@docusaurus/preset-classic",
+ *         {
+ *           docs: {
+ *             remarkPlugins: [/* your existing remark plugins * /],
+ *             rehypePlugins: [[rehypeCallouts, {/* options if any * /}]],
+ *           },
+ *         },
+ *       ],
+ *     ];
+ *
+ * Result: fewer custom transforms to maintain, better HTML semantics, and alignment with the
+ *         actively maintained plugin landscape for callouts.
+ */
+
 // Note: the callout regex in theory is only matched in the context of a parent block being a block quote
 const CALLOUT_REGEX = /^\[!(\w+)\](.*)$/;
 const remarkObsidianCallout: Plugin = () => {
