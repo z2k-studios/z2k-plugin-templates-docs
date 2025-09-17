@@ -1,4 +1,5 @@
 import { Index, Summary } from './types.ts';
+import * as utils from './utils.ts'
 
 // ====================================================================================================
 // Step 5: Log Summary 
@@ -16,8 +17,10 @@ export function logSummary(summary: Summary, index: Index) {
   console.log(`Files copied: ${summary.filesCopied}`);
   console.log(`Wikilinks rewritten: ${summary.wikilinksRewritten || 0}`);
   console.log(`Unresolved links: ${summary.unresolvedLinks || 0}`);
-  console.log('Title-to-path map:');
-  for (const [title, entry] of index.fileTitleMap.entries()) {
-    console.log(`  "${title}" → ${entry.destDir}/${entry.destSlug}`);
+  if (utils.VERBOSE || utils.DEBUG) {
+    console.log('Title-to-path map:');
+    for (const [title, entry] of index.fileTitleMap.entries()) {
+      console.log(`  "${title}" → ${entry.destDir}/${entry.destSlug}`);
+    }
   }
 }

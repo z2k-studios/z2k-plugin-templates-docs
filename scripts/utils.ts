@@ -1,4 +1,4 @@
-import slugify from 'slugify';
+import slugify from './slugify.js';
 import path from 'path';
 
 // console.log("✅ LOADED utils.ts from", import.meta.url);

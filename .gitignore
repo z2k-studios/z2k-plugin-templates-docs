@@ -1,5 +1,6 @@
 # Ignore the docs folder (synced from source)
 docs/
+unresolvedLinks.log
 
 # Node modules
 node_modules/

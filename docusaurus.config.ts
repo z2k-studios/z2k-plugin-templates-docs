@@ -2,9 +2,9 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import slugify from 'slugify';
+import rehypeCallouts from 'rehype-callouts';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
-
 const config: Config = {
   title: 'My Site',
   tagline: 'Dinosaurs are cool',
@@ -51,33 +51,8 @@ const config: Config = {
           // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-          remarkPlugins: [
-            [
-              require('remark-wiki-link'),
-              {
-                // Convert [[My Page]] to the corresponding sluggified filename
-                pageResolver: (name: string) => {
-                  // Split out any anchor
-                  const [pageName] = name.split('#');
-                  const slug = slugify(pageName, { lower: true, strict: true });
-                  return [slug];
-                },
-                // Generate relative link path
-                hrefTemplate: (permalink, page = '') => {
-                  const [pageName, hash] = page.split('#');
-                  const slug = slugify(pageName, { lower: true, strict: true });
-                  const anchor = hash ? `#${slugify(hash, { lower: true, strict: true })}` : '';
-                  return `./${slug}${anchor}`;
-                },
-
-/*                hrefTemplate: (permalink) =>
-                  './' + permalink, // + '.md', // Commented out the extension so that docusaurus can add it.
-*/
-                // Optional: display the title from YAML if you want smart display names
-                aliasDivider: '|', // Allow [[slug|Custom Title]] if you want to override display manually
-              },
-            ],
-          ],
+          remarkPlugins: [       ],
+          rehypePlugins: [rehypeCallouts],
         },
         blog: {
           showReadingTime: true,
@@ -93,6 +68,7 @@ const config: Config = {
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
+          rehypePlugins: [rehypeCallouts],
         },
         theme: {
           customCss: './src/css/custom.css',
