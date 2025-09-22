@@ -3,9 +3,9 @@
 # Runs the import-obsidian.ts script using ts-node.
 # Usage: ./run-import-obsidian.sh [-v] [other args]
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-ROOT_DIR="$SCRIPT_DIR/.."
-TS_SCRIPT="$SCRIPT_DIR/import-obsidian.ts"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)" # Relative path from repo's root directory to this script (i.e. "./scripts/import-obsidian")
+REPO_ROOT_DIR="$SCRIPT_DIR/../.."  # This is the root of the repository (i.e. "<repo_root>")
+MAIN_TS_SCRIPT="$SCRIPT_DIR/import-obsidian.ts" # This is the main script to run (i.e. "./scripts/import-obsidian/import-obsidian.ts")
 
 # clear the screen and output demarcation
 echo ""
@@ -91,16 +91,16 @@ fi
 
 # NOW, finally ready to run the script
 echo "▶️ Running import-obsidian.ts with args: $@"
-cd "$ROOT_DIR"
+cd "$REPO_ROOT_DIR"
 if $DEBUG_MODE; then
   echo "Current directory: $(pwd)"
   echo "Debug mode enabled. Running with tsx in debug mode..."
-  npx tsx --inspect "$TS_SCRIPT" "$@"
+  npx tsx --inspect "$MAIN_TS_SCRIPT" "$@"
   # echo "Debug mode enabled. Running with ts-node in debug mode..."
-  # npx ts-node --esm "$TS_SCRIPT" "$@"
-  # node --inspect ./node_modules/.bin/ts-node "$TS_SCRIPT" "$@"
+  # npx ts-node --esm "$MAIN_TS_SCRIPT" "$@"
+  # node --inspect ./node_modules/.bin/ts-node "$MAIN_TS_SCRIPT" "$@"
 else
-  # npx ts-node --loader ts-node/esm "$TS_SCRIPT" "$@" 
-  # node --loader ts-node/esm "$TS_SCRIPT" "$@"
-  npx tsx "$TS_SCRIPT" "$@"
+  # npx ts-node --loader ts-node/esm "$MAIN_TS_SCRIPT" "$@" 
+  # node --loader ts-node/esm "$MAIN_TS_SCRIPT" "$@"
+  npx tsx "$MAIN_TS_SCRIPT" "$@"
 fi

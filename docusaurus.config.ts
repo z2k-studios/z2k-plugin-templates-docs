@@ -6,8 +6,8 @@ import rehypeCallouts from 'rehype-callouts';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 const config: Config = {
-  title: 'My Site',
-  tagline: 'Dinosaurs are cool',
+  title: 'Z2K Templates',
+  tagline: 'Turbocharge your Obsidian workflow with the Z2K Templates plugin',
   favicon: 'img/favicon.ico',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -49,8 +49,8 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+          // editUrl:
+          //   'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
           remarkPlugins: [       ],
           rehypePlugins: [rehypeCallouts],
         },
@@ -81,7 +81,7 @@ const config: Config = {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
-      title: 'Z2K Templates Obsidian Plugin',
+      title: 'Z2K Templates',
       logo: {
         alt: 'Z2K System Logo',
         src: 'img/z2k-system.png', // <-- Set your PNG logo here

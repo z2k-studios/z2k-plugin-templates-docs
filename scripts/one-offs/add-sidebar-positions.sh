@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-SRC="../z2k-plugin-templates/docs"
+SRC="../../z2k-plugin-templates/docs"
 
 echo "➕ Adding sidebar_position fields to source files in $SRC..."
 echo 

@@ -7,9 +7,6 @@ import remarkParse from 'remark-parse';
 import remarkStringify, { Options as RemarkStringifyOptions } from 'remark-stringify';
 import { visit } from 'unist-util-visit';
 
-import { Node, Parent } from 'unist';
-import { Literal } from 'mdast';
-
 import { Index, Summary, FileIndexEntry } from './types.ts';
 import * as utils from './utils.ts'
 
@@ -46,21 +43,6 @@ export async function copyAndTransformFiles(index: Index, summary: Summary) {
   } catch (e) {
     console.warn('Could not initialize unresolved links log at', UNRESOLVED_LOG_PATH, e);
     UNRESOLVED_LOG_PATH = null;
-  }
-
-  // If debug mode, only process the first file for faster iteration
-  if (utils.DEBUG) {
-    if (index.files.length > 0) {
-      const testFile = "_internal-remark-test";
-      utils.verboseLog(`DEBUG mode - processing only the ${testFile}.md file for faster iteration`);
-
-      const testFileEntry = index.files.find(f => f.sourceName === testFile);
-      if (!testFileEntry) {
-        throw new Error(`DEBUG mode: test file "${testFile}" not found in index.`);
-      }
-      await copyAndTransformAFile(testFileEntry, index, summary);
-    }
-    return;
   }
 
   // Step through each file in the index
@@ -106,6 +88,9 @@ async function copyAndTransformAFile(file: Index['files'][number], index: Index,
       yamlLineOffset = 0;
     }
 
+    // Expand Obsidian embeds before remark parses content
+    content = preprocessEmbeds(content, index, path.dirname(file.sourcePath));
+
     // my custom options for remark-stringify
     // See: https://www.npmjs.com/package/remark-stringify
     const myStringifyOptions: RemarkStringifyOptions = {
@@ -114,13 +99,13 @@ async function copyAndTransformAFile(file: Index['files'][number], index: Index,
       rule: "-",              // keep HR as '---'
       ruleSpaces: false,        // no spaces around HR
       fences: true,             // keep fenced code blocks
-      listItemIndent: "tab",    // tab for nested list items 
+      listItemIndent: "one",    // tab for nested list items 
       closeAtx: false,           // close ATX headings with `###` not escaped
       tightDefinitions: true,   // definition lists compact
       resourceLink: true,       // keep [text](url) instead of <url>
       emphasis: "*",            // pick style for italics
       strong: "*",              // style for bold
-      // optional: you can tweak this further if docusaurus needs
+       // optional: you can tweak this further if docusaurus needs
     };
 
     // Add missing YAML fields
@@ -143,11 +128,13 @@ async function copyAndTransformAFile(file: Index['files'][number], index: Index,
       
       // Now stringify back to markdown
       .use(remarkStringify, myStringifyOptions)
-
       .process(content);
 
+    // Now get rid of the changes we don't want (argh)
+    const finalOutput = postProcessMarkdown(String(transformed));
+
     // Write new file
-    const out = matter.stringify(transformed.toString(), data);
+    const out = matter.stringify(finalOutput.toString(), data);
     fs.writeFileSync(destFilePath, out, 'utf8');
     fs.chmodSync(destFilePath, 0o444); // read-only
     // utils.verboseLog(`Wrote and chmod 444: ${utils.cleanFolderNamesForConsoleOutput(destFilePath)}`);
@@ -396,4 +383,156 @@ function appendToUnresolvedLog(line: string) {
   } catch (e) {
     console.warn('Failed to append to unresolved links log:', UNRESOLVED_LOG_PATH, e);
   }
+}
+
+// Handle some post processing of the new markdown text
+function postProcessMarkdown(md: string): string {
+
+  // remark writes out new markdown text, but has a number of changes that we don't want 
+  // This undoes them. 
+
+  return md
+    // Unescape underscores in identifiers / headings
+    .replace(/\\_/g, "_")
+    // Unescape ==highlight== markers
+    .replace(/\\==/g, "==")
+
+    // Unescape escaped link brackets
+    .replace(/\\\[/g, "[")
+    .replace(/\\\]/g, "]")
+    .replace(/\\\(/g, "(")
+    .replace(/\\\)/g, ")");
+}
+
+
+/**
+ * Strips leading YAML frontmatter (--- ... ---) from a Markdown string.
+ * Returns the Markdown content without YAML.
+ */
+function stripYamlFrontmatter(md: string): string {
+  if (md.startsWith("---")) {
+    const lines = md.split("\n");
+    let endIndex = -1;
+    for (let i = 1; i < lines.length; i++) {
+      if (lines[i].trim() === "---") {
+        endIndex = i;
+        break;
+      }
+    }
+    if (endIndex !== -1) {
+      return lines.slice(endIndex + 1).join("\n");
+    }
+  }
+  return md;
+}
+
+/**
+ * Extracts the section of markdown under a given header.
+ * 
+ * @param content The markdown content (with YAML already stripped).
+ * @param header The header string to look for (case-insensitive, ignores leading #).
+ */
+function extractHeaderSection(content: string, header: string): string | null {
+  const lines = content.split("\n");
+  const target = header.trim().toLowerCase();
+
+  // Find the header line (case-insensitive, ignore # count)
+  const headerIndex = lines.findIndex((line) => {
+    if (!line.trim().startsWith("#")) return false;
+    const text = line.replace(/^#+\s*/, "").trim().toLowerCase();
+    return text === target;
+  });
+
+  if (headerIndex === -1) {
+    return null; // header not found
+  }
+
+  // Determine header level (e.g. ## = 2)
+  const headerLevel = (lines[headerIndex].match(/^#+/)?.[0].length ?? 1);
+
+  // Collect all lines until the next header of same or higher level
+  const sectionLines: string[] = [];
+  for (let i = headerIndex + 1; i < lines.length; i++) {
+    const nextLine = lines[i];
+    if (nextLine.startsWith("#")) {
+      const nextLevel = (nextLine.match(/^#+/)?.[0].length ?? 1);
+      if (nextLevel <= headerLevel) break;
+    }
+    sectionLines.push(nextLine);
+  }
+
+  return sectionLines.join("\n").trim();
+}
+
+
+/**
+ * Expand Obsidian-style embeds (![[file]] or ![[file#header]]) inline
+ *
+ * @param content The raw markdown content of the current file
+ * @param index The index you built in step2 (for resolving file paths)
+ * @param currentDir The directory of the current file, for relative resolution
+ */
+export function preprocessEmbeds(
+  content: string,
+  index: Index,
+  currentDir: string
+): string {
+  const embedPattern = /!\[\[([^\]#]+)(?:#([^\]]+))?\]\]/g;
+
+  return content.replace(embedPattern, (match, fileName, header) => {
+    try {
+      // Resolve the file path using your index (adjust as needed for your index shape)
+      // const targetPath = 
+      //   index.fileNameMap[fileName] ||
+      //   index.fileSlugMap[fileName] ||
+      //   path.join(currentDir, fileName + ".md");
+
+      // Try to resolve by filename
+      let targetEntry: FileIndexEntry | undefined;
+
+      const nameMatches = index.fileNameMap.get(fileName);
+      if (nameMatches && nameMatches.length > 0) {
+        targetEntry = nameMatches[0]; // TODO: handle duplicates if you want smarter resolution
+      }
+
+      // Try slug if not found
+      if (!targetEntry) {
+        const slugMatch = index.fileSlugMap.get(fileName);
+        if (slugMatch) targetEntry = slugMatch;
+      }
+
+      // Fallback: assume relative file
+      const targetPath = targetEntry
+        ? targetEntry.sourcePath
+        : path.join(currentDir, fileName + ".md");
+
+
+
+      if (!fs.existsSync(targetPath)) {
+        console.warn(`Embed target not found: ${fileName}`);
+        return `> **Missing embed: ${fileName}**`;
+      }
+
+      // Read and strip YAML
+      const raw = fs.readFileSync(targetPath, "utf8");
+      const { content: targetContent } = matter(raw);
+
+      let snippet = targetContent;
+
+      // If a header was specified, extract section under that header
+      if (header) {
+        const section = extractHeaderSection(targetContent, header);
+        if (section) {
+          snippet = section;
+        } else {
+          console.warn(`Header '${header}' not found in ${fileName}`);
+        }
+      }
+
+      return snippet.trim();
+    } catch (err) {
+      console.error(`Error embedding ${fileName}:`, err);
+      return `> **Error embedding ${fileName}**`;
+    }
+  });
 }

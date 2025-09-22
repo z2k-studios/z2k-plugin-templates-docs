@@ -8,12 +8,13 @@ import path from 'path';
 // ----------------------------------------------------------------------------------------------------
 export const SRC_REPO_NAME = 'z2k-plugin-templates';
 export const DEST_REPO_NAME = 'z2k-plugin-templates-docs';
+export const TEST_JIG_FOLDER = `./scripts/import-obsidian/test-jigs`;
 
 /**
  * Use process.cwd() for project-root-relative paths, not __dirname (which is script-relative).
  * This ensures SRC and DEST are always relative to where the script is run from (the repo root).
  */
-export const SRC = path.resolve(process.cwd(), `../${SRC_REPO_NAME}/docs`);
+export let SRC = path.resolve(process.cwd(), `../${SRC_REPO_NAME}/docs`);
 export const DEST = path.resolve(process.cwd(), './docs');
 
 // This prefix is used to ignore files that start with a dot (e.g., .gitkeep, .DS_Store, etc.)
@@ -32,6 +33,9 @@ export function cleanFolderNamesForConsoleOutput(folderName: string): string {
   return cleanedName;
 }
 
+// ----------------------------------------------------------------------------------------------------
+// --- Execution Modes ---
+// ----------------------------------------------------------------------------------------------------
 
 export let VERBOSE = false;
 export function verboseLog(...args: any[]) {
@@ -52,6 +56,19 @@ export function debugLog(...args: any[]) {
 export function setDebug(val: boolean) {
   DEBUG = val;
 }
+
+export let TESTING = false;
+export function setTesting(val: boolean) {
+  TESTING = val;
+
+  // Reset the source folder to use the test jig folder
+  if (TESTING) {
+    console.log("=== TESTING MODE ENABLED ===");
+    console.log(` - Only files in the '${TEST_JIG_FOLDER}' folder will be processed.`);
+    SRC = path.resolve(process.cwd(), `${TEST_JIG_FOLDER}`);
+  }
+}
+
 
 // ----------------------------------------------------------------------------------------------------
 // --- Utilities ---

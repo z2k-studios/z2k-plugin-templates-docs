@@ -32,7 +32,8 @@ async function main() {
   if (utils.VERBOSE) {   console.log('Verbose logging enabled');  } 
   utils.setDebug(process.argv.includes('-d'));
   if (utils.DEBUG)   {   console.log('Debugging enabled');  } 
-
+  utils.setTesting(process.argv.includes('-t'));
+  if (utils.TESTING)   {   console.log('Test Jigs enabled');  } // Note: this will reset the SRC path to the test jig folder
 
   // Validation
   // --------------------------------------------------------------------------------------------------

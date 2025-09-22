@@ -6,4 +6,4 @@
 #   in the process, and then builds a folder structure in the ./docs folder to hold all of the
 #   imported markdown files - setting the files as read-only to prevent accidental edits. 
 #
-./scripts/import-obsidian.sh "$@"
+./scripts/import-obsidian/run-import-obsidian.sh "$@"

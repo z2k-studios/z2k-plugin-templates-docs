@@ -1,0 +1,72 @@
+docs/
+├── 010-how-to-guides
+│   ├── 010-getting-started
+│   │   ├── getting-started-in-ten-minutes.md
+│   │   ├── getting-started-in-two-minutes.md
+│   │   └── getting-started.md
+│   ├── 020-beginner
+│   │   └── beginner.md
+│   ├── 030-intermediate
+│   │   └── intermediate.md
+│   ├── 040-advanced
+│   │   └── advanced.md
+│   └── how-to-guides.md
+├── 020-best-practices
+│   └── best-practices.md
+├── 030-reference-manual
+│   ├── 010-built-in-helper-functions
+│   │   ├── built-in-functions-directives.md
+│   │   ├── built-in-functions-formatting.md
+│   │   ├── built-in-functions-linking.md
+│   │   ├── built-in-functions-misc.md
+│   │   └── built-in-helper-functions.md
+│   ├── 020-built-in-template-fields
+│   │   ├── built-in-fields-card-data.md
+│   │   ├── built-in-fields-card-reference.md
+│   │   ├── built-in-fields-date-and-time.md
+│   │   └── built-in-template-fields.md
+│   ├── 030-data-formatting
+│   │   ├── custom-field-formatting.md
+│   │   ├── data-formatting.md
+│   │   └── default-data-formatting.md
+│   ├── 040-handlebars-support
+│   │   └── handlebars-support.md
+│   ├── 050-helper-functions
+│   │   ├── helper-functions-usage.md
+│   │   └── helper-functions.md
+│   ├── 060-partial-templates
+│   │   └── partial-templates.md
+│   ├── 070-prompting
+│   │   ├── built-in-prompting-directives.md
+│   │   ├── finalizing-and-miss-handling-for-z2k-templates.md
+│   │   ├── general-prompting-format.md
+│   │   ├── prompting-data-types.md
+│   │   └── prompting.md
+│   ├── 080-template-fields
+│   │   ├── template-field-naming-conventions.md
+│   │   ├── template-field-types.md
+│   │   └── template-fields.md
+│   ├── 090-template-files
+│   │   ├── lifecycle-of-a-template.md
+│   │   ├── obsidian-commands.md
+│   │   ├── template-files.md
+│   │   └── why-use-templates.md
+│   ├── 100-template-folders
+│   │   ├── embedded-template-folders.md
+│   │   ├── external-template-folders.md
+│   │   └── template-folders.md
+│   ├── 110-z2k-templates-and-yaml
+│   │   ├── using-z2k-fields-inside-yaml-metadata.md
+│   │   ├── z2k-system-yaml-files.md
+│   │   ├── z2k-template-yaml-configuration-fields.md
+│   │   └── z2k-templates-and-yaml.md
+│   ├── plugin-settings-page.md
+│   ├── reference-manual.md
+│   ├── z2k-system-specific-features.md
+│   └── z2k-templates-uri-and-json.md
+├── master-index.json
+├── readme.md
+├── root-level-test-file.md
+└── unresolvedlinks.log
+
+19 directories, 51 files
