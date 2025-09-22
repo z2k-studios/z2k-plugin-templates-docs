@@ -3,9 +3,10 @@ import { Index, Summary } from './types.ts';
 import * as utils from './utils.ts'
 import * as step1 from './step1-cleanTargetFolder.ts';
 import * as step2 from './step2-buildIndex.ts';
-import * as step3 from './step3-createDocsTree.ts';
-import * as step4 from './step4-remarkFiles.ts';
-import * as step5 from './step5-summarize.ts';
+import * as step3 from './step3-writeSidebar.ts'
+import * as step4 from './step4-createDocsTree.ts';
+import * as step5 from './step5-remarkFiles.ts';
+import * as step6 from './step6-summarize.ts';
 
 
 // ====================================================================================================
@@ -56,22 +57,27 @@ async function main() {
   utils.verboseLog(`\n-----------------------------\n Step 2: Building file index from: ${utils.SRC}\n-----------------------------`);
   const index = step2.buildIndex(utils.SRC);
 
-  // Step 3: Create the directory structure for Docusaurus docs based on the folder index
+  // Step 3: Create the sidebars.ts file based on the index
   // --------------------------------------------------------------------------------------------------
-  utils.verboseLog(`\n-----------------------------\n Step 3: Creating docs tree in: ${utils.DEST}\n-----------------------------`);
+  utils.verboseLog(`\n-----------------------------\n Step 3: Writing sidebars.ts to: ${step3.SIDEBAR_PATH}\n-----------------------------`);
+  step3.generateSidebar(index);
+
+  // Step 4: Create the directory structure for Docusaurus docs based on the folder index
+  // --------------------------------------------------------------------------------------------------
+  utils.verboseLog(`\n-----------------------------\n Step 4: Creating docs tree in: ${utils.DEST}\n-----------------------------`);
   fs.ensureDirSync(utils.DEST); // Ensure the Destination root exists
-  step3.createDocsTree(index.folders);
+  step4.createDocsTree(index.folders);
 
   // Step 4: Initialize a summary object to track progress and statistics
   // --------------------------------------------------------------------------------------------------
-  utils.verboseLog(`\n-----------------------------\n Step 4: Using Remark to Rewrite Markdown to MDX in: ${utils.DEST}\n-----------------------------`);
+  utils.verboseLog(`\n-----------------------------\n Step 5: Using Remark to Rewrite Markdown to MDX in: ${utils.DEST}\n-----------------------------`);
   const summary: Summary = { filesCopied: 0, wikilinksRewritten: 0, unresolvedLinks: 0 };
-  await step4.copyAndTransformFiles(index, summary); // Copy and transform each file from the source to the Destination
+  await step5.copyAndTransformFiles(index, summary); // Copy and transform each file from the source to the Destination
 
   // Step 5: Log a summary of the import process, including stats and mappings
   // --------------------------------------------------------------------------------------------------
-  utils.verboseLog(`\n-----------------------------\n Step 5: Outputting summary of actions\n-----------------------------`);
-  step5.logSummary(summary, index);
+  utils.verboseLog(`\n-----------------------------\n Step 6: Outputting summary of actions\n-----------------------------`);
+  step6.logSummary(summary, index);
 }
 
 main().catch(err => {

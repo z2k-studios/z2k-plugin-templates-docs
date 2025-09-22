@@ -12,7 +12,7 @@ import * as utils from './utils.ts'
 
 
 // ====================================================================================================
-// Step 4: Copy & Transform Each File
+// Step 5: Copy & Transform Each File
 // ====================================================================================================
 /**
  * Copies and transforms each file from the source to the destination.

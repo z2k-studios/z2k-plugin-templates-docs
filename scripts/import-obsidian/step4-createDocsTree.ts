@@ -4,7 +4,7 @@ import { FileIndexEntry, FolderIndexEntry, Index } from './types.ts';
 import * as utils from './utils.ts'
 
 // ====================================================================================================
-// Step 3: Create Docusaurus Docs Tree
+// Step 4: Create Docusaurus Docs Tree
 // ====================================================================================================
 /**
  * Creates the directory structure for Docusaurus docs based on indexed folders.
