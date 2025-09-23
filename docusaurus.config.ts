@@ -77,6 +77,8 @@ const config: Config = {
     ],
   ],
 
+  clientModules: [require.resolve('./src/client/styles-client.js')],
+
   themeConfig: {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
@@ -87,6 +89,21 @@ const config: Config = {
         src: 'img/z2k-system.png', // <-- Set your PNG logo here
       },
       items: [
+        {
+          type: 'html',
+          position: 'right',
+          value: `
+            <div class="style-switcher-dropdown">
+              <button class="dropdown-trigger">Style ▾</button>
+              <ul class="dropdown-menu">
+                <li><a href="#" data-style="default" style="font-family: var(--ifm-font-family-base);">Default</a></li>
+                <li><a href="#" data-style="github" style="font-family: 'Inter', sans-serif;">GitHub</a></li>
+                <li><a href="#" data-style="minimal" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">Minimal</a></li>
+                <li><a href="#" data-style="parchment" style="font-family: Georgia, 'Times New Roman', serif;">Parchment</a></li>
+              </ul>
+            </div>
+          `,
+        },
         {
           type: 'docSidebar',
           sidebarId: 'z2k-templates-docs',

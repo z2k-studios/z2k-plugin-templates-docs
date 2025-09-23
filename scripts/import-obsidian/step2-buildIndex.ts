@@ -5,8 +5,6 @@ import { FileIndexEntry, FolderIndexEntry, Index } from './types.ts';
 import * as utils from './utils.ts';
 import { isMarkdownOrText } from './utils.ts';
 
-const SIDEBAR_PATH = path.join(utils.DEST, '../sidebars.ts');
-
 // ====================================================================================================
 // Step 2: Build File Index
 // ====================================================================================================
@@ -86,7 +84,9 @@ export function buildIndex(src: string): Index {
     let thisFolderSidebarPosition = -1;
     if (folderDepth === 0) thisFolderSidebarPosition = 0;
 
-    const folderPosMatch = dir.match(/^(\d+)[\s-]/);
+    // Use basename for folder prefix detection
+    const base = path.basename(dir);
+    const folderPosMatch = base.match(/^(\d+)[\s-]/);
     if (thisFolderSidebarPosition < 0 && folderPosMatch) {
       thisFolderSidebarPosition = parseInt(folderPosMatch[1], 10);
     }
@@ -135,6 +135,15 @@ export function buildIndex(src: string): Index {
       if (typeof data.slug === 'string') docSlug = data.slug;
       if (typeof data.sidebar_position === 'number') docSidebarPos = data.sidebar_position;
 
+      // Optional inference: number prefix from filename (e.g., 007-intro.md)
+      if (docSidebarPos < 0) {
+        const numMatch = name.match(/^(\d+)[\s-]/);
+        if (numMatch) {
+          docSidebarPos = parseInt(numMatch[1], 10);
+          utils.verboseLog(`Inferred sidebar_position=${docSidebarPos} for ${utils.cleanFolderNamesForConsoleOutput(sourcePath)}`);
+        }
+      }
+
       files.push({
         sourcePath,
         sourceDir: dir,
@@ -169,7 +178,7 @@ export function buildIndex(src: string): Index {
   walk(src, '', 0);
 
   // Write master index debug file
-  const indexPath = path.join(utils.DEST, 'docs/debug/master-index.json');
+  const indexPath = path.join(utils.DEST, 'debug/master-index.json');
   fs.mkdirSync(path.dirname(indexPath), { recursive: true });
   fs.writeFileSync(indexPath, JSON.stringify({ files, folders }, null, 2), 'utf8');
   console.log(`📝 Master index written to ${indexPath}`);

@@ -1,30 +1,148 @@
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
 
-/* You can override the default Infima variables here. */
-:root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+/* ==========================================================
+   Z2K "styles" system — multiple visual variants with fonts
+   ========================================================== */
+
+/* Google Fonts imports */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Georgia:wght@400;700&display=swap');
+
+/* ---------- GitHub Style ---------- */
+html.style-github {
+  --ifm-font-family-base: "Inter", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  --ifm-font-size-base: 16px;
+  --ifm-heading-font-weight: 500;
+  --ifm-h1-font-size: 1.75rem;
+  --ifm-h2-font-size: 1.5rem;
+  --ifm-h3-font-size: 1.25rem;
+  --ifm-spacing-horizontal: 1.5rem;
+  --ifm-spacing-vertical: 2rem;
+  --ifm-heading-vertical-rhythm-top: 2.5rem;
+  --ifm-heading-vertical-rhythm-bottom: 1.25rem;
+  --ifm-color-primary: #24292f;
+  --ifm-color-content: #2f363d;
+  --ifm-background-color: #ffffff;
+  --ifm-color-emphasis-100: #f6f8fa;
+  --ifm-color-emphasis-200: #e1e4e8;
+  --ifm-global-radius: 6px;
+}
+html.style-github .container { max-width: 920px; }
+html.style-github main { padding-top: 2rem; padding-bottom: 4rem; line-height: 1.7; }
+html.style-github .theme-doc-sidebar-container {
+  background-color: var(--ifm-color-emphasis-100);
+  padding: 1rem;
+  margin: 1.5rem 0.5rem;
+  border-radius: var(--ifm-global-radius);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+html.style-github .menu__link { color: #333333; font-weight: 500; }
+html.style-github .menu__link--active {
+  background-color: var(--ifm-color-emphasis-200);
+  border-radius: var(--ifm-global-radius);
+}
+html[data-theme='dark'].style-github {
+  --ifm-background-color: #0d1117;
+  --ifm-color-primary: #c9d1d9;
+  --ifm-color-content: #adbac7;
+  --ifm-color-emphasis-100: #161b22;
+  --ifm-color-emphasis-200: #21262d;
+  --ifm-heading-color: #ffffff;
+  --ifm-link-color: #58a6ff;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+/* ---------- Minimal Style ---------- */
+html.style-minimal {
+  --ifm-font-family-base: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --ifm-font-size-base: 15px;
+  --ifm-h1-font-size: 1.5rem;
+  --ifm-h2-font-size: 1.25rem;
+  --ifm-h3-font-size: 1.1rem;
+  --ifm-color-primary: #111;
+  --ifm-color-content: #222;
+  --ifm-background-color: #fff;
+  --ifm-color-emphasis-100: #fafafa;
+  --ifm-color-emphasis-200: #e5e5e5;
+  --ifm-spacing-horizontal: 1rem;
+  --ifm-spacing-vertical: 1.25rem;
+  --ifm-global-radius: 0px;
+}
+html[data-theme='dark'].style-minimal {
+  --ifm-background-color: #181818;
+  --ifm-color-content: #ddd;
+  --ifm-color-primary: #eee;
+  --ifm-color-emphasis-100: #222;
+  --ifm-color-emphasis-200: #333;
+}
+
+/* ---------- Parchment Style ---------- */
+html.style-parchment {
+  --ifm-font-family-base: "Georgia", "Times New Roman", serif;
+  --ifm-font-size-base: 16px;
+  --ifm-h1-font-size: 1.7rem;
+  --ifm-h2-font-size: 1.4rem;
+  --ifm-h3-font-size: 1.2rem;
+  --ifm-color-primary: #3b2f2f;
+  --ifm-color-content: #2e2b29;
+  --ifm-background-color: #fdfaf4;
+  --ifm-color-emphasis-100: #f8f3e9;
+  --ifm-color-emphasis-200: #e6dcc3;
+  background-image: radial-gradient(circle at top left, #fdfaf4, #f6f1e7);
+  background-attachment: fixed;
+}
+html[data-theme='dark'].style-parchment {
+  --ifm-background-color: #2a2520;
+  --ifm-color-content: #e5decf;
+  --ifm-color-primary: #f0e6d2;
+  --ifm-color-emphasis-100: #3b342d;
+  --ifm-color-emphasis-200: #4a4037;
+  background-image: radial-gradient(circle at top left, #2a2520, #322b24);
+}
+
+/* ---------- Dropdown Styling ---------- */
+.style-switcher-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.style-switcher-dropdown .dropdown-trigger {
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  color: var(--ifm-navbar-link-color);
+}
+.style-switcher-dropdown .dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  background: var(--ifm-background-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 4px;
+  list-style: none;
+  padding: 0.5rem;
+  margin: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 100;
+}
+.style-switcher-dropdown:hover .dropdown-menu {
+  display: block;
+}
+.style-switcher-dropdown li { margin: 0; }
+.style-switcher-dropdown a {
+  font-size: 0.9rem;
+  color: var(--ifm-color-content);
+  text-decoration: none;
+  display: block;
+  padding: 0.25rem 0.75rem;
+}
+.style-switcher-dropdown a[data-style="github"] {
+  font-family: 'Inter', sans-serif;
+}
+.style-switcher-dropdown a[data-style="minimal"] {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+.style-switcher-dropdown a[data-style="parchment"] {
+  font-family: Georgia, 'Times New Roman', serif;
+}
+.style-switcher-dropdown a:hover {
+  background: var(--ifm-color-emphasis-100);
 }

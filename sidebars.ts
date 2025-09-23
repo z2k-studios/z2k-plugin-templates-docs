@@ -7,13 +7,9 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
 const sidebars: SidebarsConfig = {
   'z2k-templates-docs': [
   {
-    "type": "category",
-    "label": "Best Practices",
-    "items": [],
-    "link": {
-      "type": "doc",
-      "id": "best-practices/best-practices"
-    }
+    "type": "doc",
+    "id": "readme",
+    "label": "Introduction"
   },
   {
     "type": "category",
@@ -74,51 +70,80 @@ const sidebars: SidebarsConfig = {
   },
   {
     "type": "category",
-    "label": "Z2K Templates Plugin",
+    "label": "Best Practices",
+    "items": [],
+    "link": {
+      "type": "doc",
+      "id": "best-practices/best-practices"
+    }
+  },
+  {
+    "type": "category",
+    "label": "Reference Manual",
     "items": [
       {
-        "type": "doc",
-        "id": "reference-manual/z2k-system-specific-features",
-        "label": "Z2K System Specific Features"
-      },
-      {
-        "type": "doc",
-        "id": "reference-manual/z2k-templates-uri-and-json",
-        "label": "Z2K Templates, URI, and JSON"
-      },
-      {
-        "type": "doc",
-        "id": "reference-manual/plugin-settings-page",
-        "label": "Plugin Settings Page"
-      },
-      {
         "type": "category",
-        "label": "Built-In Helper Functions",
+        "label": "Template Files",
         "items": [
           {
             "type": "doc",
-            "id": "reference-manual/built-in-helper-functions/built-in-functions-formatting",
-            "label": "Built-In Functions - Formatting"
+            "id": "reference-manual/template-files/why-use-templates",
+            "label": "Why Use Templates?"
           },
           {
             "type": "doc",
-            "id": "reference-manual/built-in-helper-functions/built-in-functions-linking",
-            "label": "Built-In Functions - Linking"
+            "id": "reference-manual/template-files/lifecycle-of-a-template",
+            "label": "Lifecycle of a Template"
           },
           {
             "type": "doc",
-            "id": "reference-manual/built-in-helper-functions/built-in-functions-misc",
-            "label": "Built-In Functions - Misc"
-          },
-          {
-            "type": "doc",
-            "id": "reference-manual/built-in-helper-functions/built-in-functions-directives",
-            "label": "Built-In Functions - Directives"
+            "id": "reference-manual/template-files/obsidian-commands",
+            "label": "Obsidian Commands"
           }
         ],
         "link": {
           "type": "doc",
-          "id": "reference-manual/built-in-helper-functions/built-in-helper-functions"
+          "id": "reference-manual/template-files/template-files"
+        }
+      },
+      {
+        "type": "category",
+        "label": "Template Fields",
+        "items": [
+          {
+            "type": "doc",
+            "id": "reference-manual/template-fields/template-field-types",
+            "label": "Template Field Types"
+          },
+          {
+            "type": "doc",
+            "id": "reference-manual/template-fields/template-field-naming-conventions",
+            "label": "Template Field Naming Conventions"
+          }
+        ],
+        "link": {
+          "type": "doc",
+          "id": "reference-manual/template-fields/template-fields"
+        }
+      },
+      {
+        "type": "category",
+        "label": "Template Folders",
+        "items": [
+          {
+            "type": "doc",
+            "id": "reference-manual/template-folders/external-template-folders",
+            "label": "External Template Folders"
+          },
+          {
+            "type": "doc",
+            "id": "reference-manual/template-folders/embedded-template-folders",
+            "label": "Embedded Template Folders"
+          }
+        ],
+        "link": {
+          "type": "doc",
+          "id": "reference-manual/template-folders/template-folders"
         }
       },
       {
@@ -168,39 +193,6 @@ const sidebars: SidebarsConfig = {
       },
       {
         "type": "category",
-        "label": "Handlebars Support",
-        "items": [],
-        "link": {
-          "type": "doc",
-          "id": "reference-manual/handlebars-support/handlebars-support"
-        }
-      },
-      {
-        "type": "category",
-        "label": "Helper Functions",
-        "items": [
-          {
-            "type": "doc",
-            "id": "reference-manual/helper-functions/helper-functions-usage",
-            "label": "Helper Functions Usage"
-          }
-        ],
-        "link": {
-          "type": "doc",
-          "id": "reference-manual/helper-functions/helper-functions"
-        }
-      },
-      {
-        "type": "category",
-        "label": "Partial Templates",
-        "items": [],
-        "link": {
-          "type": "doc",
-          "id": "reference-manual/partial-templates/partial-templates"
-        }
-      },
-      {
-        "type": "category",
         "label": "Prompting",
         "items": [
           {
@@ -231,67 +223,65 @@ const sidebars: SidebarsConfig = {
       },
       {
         "type": "category",
-        "label": "Template Fields",
-        "items": [
-          {
-            "type": "doc",
-            "id": "reference-manual/template-fields/template-field-types",
-            "label": "Template Field Types"
-          },
-          {
-            "type": "doc",
-            "id": "reference-manual/template-fields/template-field-naming-conventions",
-            "label": "Template Field Naming Conventions"
-          }
-        ],
+        "label": "Handlebars Support",
+        "items": [],
         "link": {
           "type": "doc",
-          "id": "reference-manual/template-fields/template-fields"
+          "id": "reference-manual/handlebars-support/handlebars-support"
         }
       },
       {
         "type": "category",
-        "label": "Template Files",
+        "label": "Helper Functions",
         "items": [
           {
             "type": "doc",
-            "id": "reference-manual/template-files/why-use-templates",
-            "label": "Why Use Templates?"
-          },
-          {
-            "type": "doc",
-            "id": "reference-manual/template-files/lifecycle-of-a-template",
-            "label": "Lifecycle of a Template"
-          },
-          {
-            "type": "doc",
-            "id": "reference-manual/template-files/obsidian-commands",
-            "label": "Obsidian Commands"
+            "id": "reference-manual/helper-functions/helper-functions-usage",
+            "label": "Helper Functions Usage"
           }
         ],
         "link": {
           "type": "doc",
-          "id": "reference-manual/template-files/template-files"
+          "id": "reference-manual/helper-functions/helper-functions"
         }
       },
       {
         "type": "category",
-        "label": "Template Folders",
+        "label": "Built-In Helper Functions",
         "items": [
           {
             "type": "doc",
-            "id": "reference-manual/template-folders/external-template-folders",
-            "label": "External Template Folders"
+            "id": "reference-manual/built-in-helper-functions/built-in-functions-formatting",
+            "label": "Built-In Functions - Formatting"
           },
           {
             "type": "doc",
-            "id": "reference-manual/template-folders/embedded-template-folders",
-            "label": "Embedded Template Folders"
+            "id": "reference-manual/built-in-helper-functions/built-in-functions-linking",
+            "label": "Built-In Functions - Linking"
+          },
+          {
+            "type": "doc",
+            "id": "reference-manual/built-in-helper-functions/built-in-functions-misc",
+            "label": "Built-In Functions - Misc"
+          },
+          {
+            "type": "doc",
+            "id": "reference-manual/built-in-helper-functions/built-in-functions-directives",
+            "label": "Built-In Functions - Directives"
           }
         ],
         "link": {
           "type": "doc",
-          "id": "reference-manual/template-folders/template-folders"
+          "id": "reference-manual/built-in-helper-functions/built-in-helper-functions"
+        }
+      },
+      {
+        "type": "category",
+        "label": "Partial Templates",
+        "items": [],
+        "link": {
+          "type": "doc",
+          "id": "reference-manual/partial-templates/partial-templates"
         }
       },
       {
@@ -318,17 +308,27 @@ const sidebars: SidebarsConfig = {
           "type": "doc",
           "id": "reference-manual/z2k-templates-and-yaml/z2k-templates-and-yaml"
         }
+      },
+      {
+        "type": "doc",
+        "id": "reference-manual/z2k-system-specific-features",
+        "label": "Z2K System Specific Features"
+      },
+      {
+        "type": "doc",
+        "id": "reference-manual/z2k-templates-uri-and-json",
+        "label": "Z2K Templates, URI, and JSON"
+      },
+      {
+        "type": "doc",
+        "id": "reference-manual/plugin-settings-page",
+        "label": "Plugin Settings Page"
       }
     ],
     "link": {
       "type": "doc",
       "id": "reference-manual/reference-manual"
     }
-  },
-  {
-    "type": "doc",
-    "id": "readme",
-    "label": "Z2K Templates In-a-Nutshell"
   },
   {
     "type": "doc",

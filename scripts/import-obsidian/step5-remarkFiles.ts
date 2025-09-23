@@ -426,113 +426,143 @@ function stripYamlFrontmatter(md: string): string {
   return md;
 }
 
+// Robust slug for heading comparisons (GitHub/Docusaurus-like)
+function slugifyHeading(text: string): string {
+  return text
+    .normalize("NFKD")                // split accents
+    .replace(/[\u0300-\u036f]/g, "")  // drop combining marks
+    .replace(/[`*_~]/g, "")           // drop md inline markers
+    .replace(/[^\w\s-]/g, "")         // drop punctuation except hyphen/space
+    .trim()
+    .replace(/\s+/g, "-")             // spaces -> hyphen
+    .replace(/-+/g, "-")              // collapse hyphens
+    .toLowerCase();
+}
+
 /**
- * Extracts the section of markdown under a given header.
- * 
- * @param content The markdown content (with YAML already stripped).
- * @param header The header string to look for (case-insensitive, ignores leading #).
+ * Extract section under a given header, INCLUDING the header line,
+ * stopping at the next header of the same or higher level.
+ * Returns null if the header isn't found.
  */
 function extractHeaderSection(content: string, header: string): string | null {
-  const lines = content.split("\n");
-  const target = header.trim().toLowerCase();
+  const lines = content.split(/\r?\n/);
+  const targetSlug = slugifyHeading(header);
 
-  // Find the header line (case-insensitive, ignore # count)
-  const headerIndex = lines.findIndex((line) => {
-    if (!line.trim().startsWith("#")) return false;
-    const text = line.replace(/^#+\s*/, "").trim().toLowerCase();
-    return text === target;
-  });
+  let headerIndex = -1;
+  let headerLevel = 0;
 
-  if (headerIndex === -1) {
-    return null; // header not found
-  }
-
-  // Determine header level (e.g. ## = 2)
-  const headerLevel = (lines[headerIndex].match(/^#+/)?.[0].length ?? 1);
-
-  // Collect all lines until the next header of same or higher level
-  const sectionLines: string[] = [];
-  for (let i = headerIndex + 1; i < lines.length; i++) {
-    const nextLine = lines[i];
-    if (nextLine.startsWith("#")) {
-      const nextLevel = (nextLine.match(/^#+/)?.[0].length ?? 1);
-      if (nextLevel <= headerLevel) break;
+  // Find the header line by slug
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^\s*(#+)\s+(.*)$/);
+    if (!m) continue;
+    const level = m[1].length;
+    const text = m[2].trim();
+    if (slugifyHeading(text) === targetSlug) {
+      headerIndex = i;
+      headerLevel = level;
+      break;
     }
-    sectionLines.push(nextLine);
   }
 
-  return sectionLines.join("\n").trim();
+  if (headerIndex === -1) return null;
+
+  // Collect from this header until next header of same or higher level
+  const section: string[] = [lines[headerIndex]];
+  for (let i = headerIndex + 1; i < lines.length; i++) {
+    const m = lines[i].match(/^\s*(#+)\s+(.*)$/);
+    if (m) {
+      const level = m[1].length;
+      if (level <= headerLevel) break;
+    }
+    section.push(lines[i]);
+  }
+  return section.join("\n").trim();
 }
 
 
+
 /**
- * Expand Obsidian-style embeds (![[file]] or ![[file#header]]) inline
+ * Expand Obsidian-style embeds (![[file]] or ![[file#header]]) inline.
  *
- * @param content The raw markdown content of the current file
- * @param index The index you built in step2 (for resolving file paths)
- * @param currentDir The directory of the current file, for relative resolution
+ * Supports:
+ *   - Embedding entire files: ![[foo]]
+ *   - Embedding a section under a header: ![[foo#Some Header]]
+ *
+ * Behavior:
+ *   - Resolves the file via the Index (filename map first, then slug map).
+ *   - Falls back to relative path if not found in Index.
+ *   - Strips YAML frontmatter from the embedded file.
+ *   - If a header is specified, includes the header itself and all content
+ *     until the next header of the same or higher level.
+ *   - Returns a warning marker if the file or header cannot be found.
+ *
+ * @param content     The raw markdown content of the current file
+ * @param index       The index built in step2 (file maps for resolution)
+ * @param currentDir  Directory of the current file, for relative resolution
  */
 export function preprocessEmbeds(
   content: string,
   index: Index,
   currentDir: string
 ): string {
+  // Match ![[file]] and ![[file#header]]
   const embedPattern = /!\[\[([^\]#]+)(?:#([^\]]+))?\]\]/g;
 
   return content.replace(embedPattern, (match, fileName, header) => {
     try {
-      // Resolve the file path using your index (adjust as needed for your index shape)
-      // const targetPath = 
-      //   index.fileNameMap[fileName] ||
-      //   index.fileSlugMap[fileName] ||
-      //   path.join(currentDir, fileName + ".md");
-
-      // Try to resolve by filename
+      // --- Resolve target file ---
       let targetEntry: FileIndexEntry | undefined;
+      const key = normalizeKey(fileName);
 
-      const nameMatches = index.fileNameMap.get(fileName);
+      // 1. Try filename map (may return multiple entries, pick first for now)
+      const nameMatches = index.fileNameMap.get(key);
       if (nameMatches && nameMatches.length > 0) {
-        targetEntry = nameMatches[0]; // TODO: handle duplicates if you want smarter resolution
+        targetEntry = nameMatches[0];
       }
 
-      // Try slug if not found
+      // 2. Try slug map
       if (!targetEntry) {
-        const slugMatch = index.fileSlugMap.get(fileName);
+        const slugMatch = index.fileSlugMap.get(key);
         if (slugMatch) targetEntry = slugMatch;
       }
 
-      // Fallback: assume relative file
+      // 3. Fallback: relative guess
       const targetPath = targetEntry
         ? targetEntry.sourcePath
-        : path.join(currentDir, fileName + ".md");
-
-
+        : path.join(currentDir, key + ".md");
 
       if (!fs.existsSync(targetPath)) {
-        console.warn(`Embed target not found: ${fileName}`);
+        console.warn(`Embed target not found: ${fileName} (normalized: ${key})`);
         return `> **Missing embed: ${fileName}**`;
       }
 
-      // Read and strip YAML
+      // --- Read file and strip YAML frontmatter ---
       const raw = fs.readFileSync(targetPath, "utf8");
       const { content: targetContent } = matter(raw);
 
-      let snippet = targetContent;
-
-      // If a header was specified, extract section under that header
+      // --- Handle header embedding ---
       if (header) {
         const section = extractHeaderSection(targetContent, header);
         if (section) {
-          snippet = section;
+          return section.trim();
         } else {
           console.warn(`Header '${header}' not found in ${fileName}`);
+          return `> **Missing embed section:** ${fileName}#${header}`;
         }
       }
 
-      return snippet.trim();
+      // No header specified → embed whole file
+      return targetContent.trim();
     } catch (err) {
       console.error(`Error embedding ${fileName}:`, err);
       return `> **Error embedding ${fileName}**`;
     }
   });
 }
+
+
+function normalizeKey(name: string): string {
+  return name.replace(/\.[^/.]+$/, "").trim().toLowerCase();
+}
+
+
