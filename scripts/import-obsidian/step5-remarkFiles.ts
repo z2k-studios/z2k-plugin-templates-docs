@@ -10,6 +10,11 @@ import { visit } from 'unist-util-visit';
 import { Index, Summary, FileIndexEntry } from './types.ts';
 import * as utils from './utils.ts'
 
+// ====================================================================================================
+// Constants
+// ====================================================================================================
+const UNRESOLVED_LOG_NAME = 'unresolvedLinks.log';
+
 
 // ====================================================================================================
 // Step 5: Copy & Transform Each File
@@ -26,20 +31,25 @@ export async function copyAndTransformFiles(index: Index, summary: Summary) {
   warnOnBasenameCollisions(index);
 
   // Initialize unresolved links log file (clear old contents)
-  UNRESOLVED_LOG_PATH = path.join(utils.SRC, 'unresolvedLinks.log');
+  // NOTE: We use utils.SRC here because unresolved links are logged with absolute paths to the source files and this allows the source repo to be able to load the offending files directly.
+  UNRESOLVED_LOG_PATH = path.join(utils.SRC_DOCS, UNRESOLVED_LOG_NAME);
   try {
-    fs.ensureDirSync(utils.SRC);
+    fs.ensureDirSync(utils.SRC_DOCS);
     const header = `# This file is created by the import-obsidian script (and its typescript step routines - specifically step4-remarkFiles.ts).
 # It is intended to allow the user to have clickable links for VS Code into the documentation source files for unresolved links.
 # To use these as clickable links:
 #    1) open the Z2K System Workspace in VS Code
 #    2) go to the Docs folder [ cd "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs" ]
+#        (or ${utils.SRC_DOCS} if you are using a different repo name)
 #    3) cat this file [ clear &&cat unresolvedLinks.log ]
 #    4) Command-Click each link below to open the source file at the specified line/column.
 # ---------------------------------------------------------------------------------------------------------------------------
 #
 `;
     fs.writeFileSync(UNRESOLVED_LOG_PATH, header, 'utf8');
+    // Copy the Unresolved log to the Debug folder too
+    const debugUnresolvedPath = path.join(utils.PATH_DOCS_DEBUG, UNRESOLVED_LOG_NAME);
+    fs.copyFileSync(UNRESOLVED_LOG_PATH, debugUnresolvedPath);
   } catch (e) {
     console.warn('Could not initialize unresolved links log at', UNRESOLVED_LOG_PATH, e);
     UNRESOLVED_LOG_PATH = null;
@@ -61,7 +71,7 @@ export async function copyAndTransformFiles(index: Index, summary: Summary) {
 async function copyAndTransformAFile(file: Index['files'][number], index: Index, summary: Summary) {
 
   // Construct the destination file path
-  const destFilePath = path.join(utils.DEST, file.destDir, file.destSlug);
+  const destFilePath = path.join(utils.PATH_DOCS, file.destDir, file.destSlug);
 
   // Ensure the destination directory exists
   fs.ensureDirSync(path.dirname(destFilePath));

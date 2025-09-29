@@ -1,8 +1,35 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
-import slugify from 'slugify';
 import rehypeCallouts from 'rehype-callouts';
+
+/**
+ * Docusaurus Config – Z2K Templates Docs
+ *
+ * APPROACH: Single docs plugin instance with multiple sidebars (the "niki blog" style).
+ *
+ * - We define all sidebars in a single `sidebars.ts` file (e.g. "Intro", "How-To Guides",
+ *   "Best Practices", "Reference Manual").
+ * - The docs plugin loads them all, and then we wire each sidebar into the navbar
+ *   using `{ type: 'docSidebar', sidebarId: '...' }`.
+ * - Clicking a navbar item switches context into that sidebar, even though technically
+ *   everything is under one docs plugin instance (single `/docs` routeBasePath).
+ *
+ * WHY THIS METHOD:
+ * - Keeps things simple: one plugin, one set of docs, one `sidebars.ts`.
+ * - Easy cross-linking between docs since all IDs live in the same namespace.
+ * - Familiar and well-supported in tutorials and blog posts.
+ *
+ * ALTERNATIVE: Multiple docs plugin instances (the "multi-instance" approach).
+ * - Each docs section would be its own plugin, with its own `id`, `path`, `routeBasePath`,
+ *   and sidebar file.
+ * - This provides stronger separation (e.g. `/docs`, `/api`, `/community`) and independent
+ *   versioning/edit-URL controls, but is more verbose and complex.
+ *
+ * TL;DR: We only need one docs instance for Z2K Templates right now, so this config uses
+ * the simpler multi-sidebar pattern. If we later want separate URL bases (e.g. `/api`),
+ * we can migrate to multi-instance.
+ */
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 const config: Config = {
@@ -10,32 +37,22 @@ const config: Config = {
   tagline: 'Turbocharge your Obsidian workflow with the Z2K Templates plugin',
   favicon: 'img/favicon.ico',
 
-  // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
-    v4: true, // Improve compatibility with the upcoming Docusaurus v4
+    v4: true, // Compatibility with Docusaurus v4
   },
 
-  // Set the production url of your site here
   url: 'https://z2k-studios.github.io',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/z2k-plugin-templates-docs/',
 
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
   organizationName: 'z2k-studios',
   projectName: 'z2k-plugin-templates-docs',
 
-  // GitHub config
   deploymentBranch: 'gh-pages',
-  trailingSlash: false, // optional, removes trailing slashes in URLs
+  trailingSlash: false,
 
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
 
-  // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
@@ -46,12 +63,7 @@ const config: Config = {
       'classic',
       {
         docs: {
-          sidebarPath: './sidebars.ts',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          // editUrl:
-          //   'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-          remarkPlugins: [       ],
+          sidebarPath: require.resolve('./sidebars.ts'),
           rehypePlugins: [rehypeCallouts],
         },
         blog: {
@@ -60,18 +72,13 @@ const config: Config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          // editUrl:
-          //  'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-          // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
           rehypePlugins: [rehypeCallouts],
         },
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: require.resolve('./src/css/custom.css'),
         },
       } satisfies Preset.Options,
     ],
@@ -80,42 +87,20 @@ const config: Config = {
   clientModules: [require.resolve('./src/client/styles-client.js')],
 
   themeConfig: {
-    // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
       title: 'Z2K Templates',
       logo: {
         alt: 'Z2K System Logo',
-        src: 'img/z2k-system.png', // <-- Set your PNG logo here
+        src: 'img/z2k-system.png',
       },
       items: [
-        {
-          type: 'html',
-          position: 'right',
-          value: `
-            <div class="style-switcher-dropdown">
-              <button class="dropdown-trigger">Style ▾</button>
-              <ul class="dropdown-menu">
-                <li><a href="#" data-style="default" style="font-family: var(--ifm-font-family-base);">Default</a></li>
-                <li><a href="#" data-style="github" style="font-family: 'Inter', sans-serif;">GitHub</a></li>
-                <li><a href="#" data-style="minimal" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">Minimal</a></li>
-                <li><a href="#" data-style="parchment" style="font-family: Georgia, 'Times New Roman', serif;">Parchment</a></li>
-              </ul>
-            </div>
-          `,
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'z2k-templates-docs',
-          position: 'left',
-          label: 'Docs',
-        },
-        {to: '/blog', label: 'Blog', position: 'left'},
-        {
-          href: 'https://github.com/facebook/docusaurus',
-          label: 'GitHub',
-          position: 'right',
-        },
+        { type: 'docSidebar', sidebarId: 'Intro', position: 'left', label: 'Intro' },
+        { type: 'docSidebar', sidebarId: 'How To Guides', position: 'left', label: 'How To Guides' },
+        { type: 'docSidebar', sidebarId: 'Best Practices', position: 'left', label: 'Best Practices' },
+        { type: 'docSidebar', sidebarId: 'Reference Manual', position: 'left', label: 'Reference Manual' },
+        { to: '/blog', label: 'Blog', position: 'left' },
+        { href: 'https://github.com/facebook/docusaurus', label: 'GitHub', position: 'right' },
       ],
     },
     footer: {
@@ -125,39 +110,24 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial',
-              to: '/docs/intro',
+              label: 'Intro',
+              to: '/docs/readme',
             },
           ],
         },
         {
           title: 'Community',
           items: [
-            {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-            },
-            {
-              label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
-            },
-            {
-              label: 'X',
-              href: 'https://x.com/docusaurus',
-            },
+            { label: 'Stack Overflow', href: 'https://stackoverflow.com/questions/tagged/docusaurus' },
+            { label: 'Discord', href: 'https://discordapp.com/invite/docusaurus' },
+            { label: 'X', href: 'https://x.com/docusaurus' },
           ],
         },
         {
           title: 'More',
           items: [
-            {
-              label: 'Blog',
-              to: '/blog',
-            },
-            {
-              label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
-            },
+            { label: 'Blog', to: '/blog' },
+            { label: 'GitHub', href: 'https://github.com/facebook/docusaurus' },
           ],
         },
       ],

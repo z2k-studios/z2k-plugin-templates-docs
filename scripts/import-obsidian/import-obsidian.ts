@@ -38,39 +38,39 @@ async function main() {
 
   // Validation
   // --------------------------------------------------------------------------------------------------
-  if (!fs.existsSync(utils.SRC)) {
-    console.error(`Source directory does not exist: ${utils.SRC}`);
+  if (!fs.existsSync(utils.SRC_DOCS)) {
+    console.error(`Source directory does not exist: ${utils.SRC_DOCS}`);
     process.exit(1);
   }
-  if (!fs.existsSync(utils.DEST)) {
-    console.error(`Destination directory does not exist: ${utils.DEST}`);
+  if (!fs.existsSync(utils.PATH_DOCS)) {
+    console.error(`Destination directory does not exist: ${utils.PATH_DOCS}`);
     process.exit(1);
   }
 
   // Step 1: Clean the target folder by removing old Markdown and text files
   // --------------------------------------------------------------------------------------------------
-  utils.verboseLog(`\n-----------------------------\n Step 1: Cleaning target folder: ${utils.DEST}\n-----------------------------`);
-  step1.cleanTargetFolder(utils.DEST);
+  utils.verboseLog(`\n-----------------------------\n Step 1: Cleaning target folder: ${utils.PATH_DOCS}\n-----------------------------`);
+  step1.cleanTargetFolder(utils.PATH_DOCS);
 
   // Step 2: Build an index of all source files and folders, extracting metadata
   // --------------------------------------------------------------------------------------------------
-  utils.verboseLog(`\n-----------------------------\n Step 2: Building file index from: ${utils.SRC}\n-----------------------------`);
-  const index = step2.buildIndex(utils.SRC);
+  utils.verboseLog(`\n-----------------------------\n Step 2: Building file index from: ${utils.SRC_DOCS}\n-----------------------------`);
+  const index = step2.buildIndex(utils.SRC_DOCS);
 
   // Step 3: Create the sidebars.ts file based on the index
   // --------------------------------------------------------------------------------------------------
   utils.verboseLog(`\n-----------------------------\n Step 3: Writing sidebars.ts to: ${step3.SIDEBAR_PATH}\n-----------------------------`);
-  step3.generateSidebar(index);
+  step3.generateSidebars(index);
 
   // Step 4: Create the directory structure for Docusaurus docs based on the folder index
   // --------------------------------------------------------------------------------------------------
-  utils.verboseLog(`\n-----------------------------\n Step 4: Creating docs tree in: ${utils.DEST}\n-----------------------------`);
-  fs.ensureDirSync(utils.DEST); // Ensure the Destination root exists
+  utils.verboseLog(`\n-----------------------------\n Step 4: Creating docs tree in: ${utils.PATH_DOCS}\n-----------------------------`);
+  fs.ensureDirSync(utils.PATH_DOCS); // Ensure the Destination root exists
   step4.createDocsTree(index.folders);
 
   // Step 4: Initialize a summary object to track progress and statistics
   // --------------------------------------------------------------------------------------------------
-  utils.verboseLog(`\n-----------------------------\n Step 5: Using Remark to Rewrite Markdown to MDX in: ${utils.DEST}\n-----------------------------`);
+  utils.verboseLog(`\n-----------------------------\n Step 5: Using Remark to Rewrite Markdown to MDX in: ${utils.PATH_DOCS}\n-----------------------------`);
   const summary: Summary = { filesCopied: 0, wikilinksRewritten: 0, unresolvedLinks: 0 };
   await step5.copyAndTransformFiles(index, summary); // Copy and transform each file from the source to the Destination
 

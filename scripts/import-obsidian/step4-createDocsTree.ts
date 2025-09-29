@@ -14,9 +14,9 @@ import * as utils from './utils.ts'
  */
 export function createDocsTree(folders: FolderIndexEntry[]) {
   for (const folder of folders) {
-    utils.verboseLog(`Ensuring directory: ${utils.cleanFolderNamesForConsoleOutput(path.join(utils.DEST, folder.destDir))}`);
+    utils.verboseLog(`Ensuring directory: ${utils.cleanFolderNamesForConsoleOutput(path.join(utils.PATH_DOCS, folder.destDir))}`);
 
     // Note: this will create the directory if it does not exist
-    fs.ensureDirSync(path.join(utils.DEST, folder.destDir));
+    fs.ensureDirSync(path.join(utils.PATH_DOCS, folder.destDir));
   }
 }

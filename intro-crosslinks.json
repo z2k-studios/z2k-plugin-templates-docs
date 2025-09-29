@@ -1,0 +1,28 @@
+{
+  "_comments": [
+    "File: intro-crosslinks.json",
+    "Purpose: Curated cross-links appended to the Intro sidebar (in addition to root docs).",
+    "Why: Let the Intro surface important pages that live in other sections (e.g. Getting Started, Reference Manual) without reorganizing content.",
+    "How it is used:",
+    "  - The step3 sidebar generator reads this file (if present) after listing root-level docs.",
+    "  - Each entry must be an object: { id: \"<docId>\", label: \"<display label>\" }",
+    "  - The id must match the Docusaurus doc id produced by the indexing step (folder/subfolder/filename-without-ext).",
+    "Notes:",
+    "  - Optional file; if missing no cross-links are added.",
+    "  - Keep this list short — think \"curated quick links\", not a second table-of-contents."
+  ],
+  "links": [
+    {
+      "id": "how-to-guides/getting-started/getting-started-in-two-minutes",
+      "label": "Getting Started in Two Minutes"
+    },
+    {
+      "id": "how-to-guides/getting-started/getting-started-in-ten-minutes",
+      "label": "Getting Started in Ten Minutes"
+    },
+    {
+      "id": "reference-manual/built-in-template-fields/built-in-template-fields",
+      "label": "Built-In Template Fields"
+    }
+  ]
+}

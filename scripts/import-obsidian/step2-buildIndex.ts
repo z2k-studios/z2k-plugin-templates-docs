@@ -91,7 +91,7 @@ export function buildIndex(src: string): Index {
       thisFolderSidebarPosition = parseInt(folderPosMatch[1], 10);
     }
 
-    const { folderIndexFile, folderTitle, folderSlug, folderPosition: extractedFolderPosition } =
+    const { folderIndexFile, folderTitle, folderSlug, folderIndexFilePosition, folderPosition: extractedFolderPosition } =
       extractFolderDataFromIndexFile(dir, filesInDir);
     if (thisFolderSidebarPosition < 0 && extractedFolderPosition !== undefined) {
       thisFolderSidebarPosition = extractedFolderPosition;
@@ -100,7 +100,9 @@ export function buildIndex(src: string): Index {
       thisFolderSidebarPosition = suggestedPosition;
     }
 
-    let finalDestFolder = `${utils.padNumber(thisFolderSidebarPosition)}-${utils.sluggify(path.basename(dir))}`;
+    // New behaviour: use slugified folder name only (do NOT inject numeric prefixes).
+    // Ordering should be controlled via folder_position in YAML or explicit sidebar positions.
+    let finalDestFolder = utils.sluggify(path.basename(dir));  // was: `${utils.padNumber(thisFolderSidebarPosition)}-${utils.sluggify(path.basename(dir))}`;
     let destDir = path.join(parentDestDir, finalDestFolder);
 
     if (folderDepth === 0) {
@@ -108,7 +110,10 @@ export function buildIndex(src: string): Index {
       destDir = '';
     }
 
-    folders.push({
+    // Compute normalizedDestDir (posix, no leading/trailing slash)
+    const normalizedDestDir = utils.normalizeDestDir(destDir);
+
+    const folderEntry: FolderIndexEntry = {
       sourcePath: dir,
       sourceName: path.basename(dir),
       destDir,
@@ -116,7 +121,11 @@ export function buildIndex(src: string): Index {
       destTitle: folderTitle,
       sidebarPosition: thisFolderSidebarPosition,
       finalDestFolder,
-    });
+      // new normalized dest dir
+      normalizedDestDir,
+    };
+
+    folders.push(folderEntry);
 
     for (const file of filesInDir) {
       if (file.startsWith(utils.IGNORE_PREFIX)) continue;
@@ -144,25 +153,39 @@ export function buildIndex(src: string): Index {
         }
       }
 
-      files.push({
+      // compute destSlug including extension
+      const destSlugWithExt = docSlug + ext;
+
+      // create file entry and include normalized dest dir + docId + normalizedDestPath for downstream
+      const normalizedDestDirForFile = utils.normalizeDestDir(destDir);
+      const docId = utils.computeDocIdFromDest(destDir, destSlugWithExt);
+      const normalizedDestPath = utils.toPosix(path.join(destDir, destSlugWithExt));
+
+      const fileEntry: FileIndexEntry = {
         sourcePath,
         sourceDir: dir,
         sourceName: name,
         sourceExt: ext,
         destDir,
-        destSlug: docSlug + ext,
+        destSlug: destSlugWithExt,
         destTitle: docTitle,
         sidebarPosition: docSidebarPos,
         hasYamlTitle: typeof data.title === 'string',
         hasYamlSlug: typeof data.slug === 'string',
         hasYamlSidebar: typeof data.sidebar_position === 'number',
-      });
+        // new normalized fields
+        normalizedDestDir: normalizedDestDirForFile,
+        docId,
+        normalizedDestPath,
+      };
 
-      fileTitleMap.set(docTitle.toLowerCase(), files[files.length - 1]);
-      fileSlugMap.set(docSlug.toLowerCase(), files[files.length - 1]);
+      files.push(fileEntry);
+
+      fileTitleMap.set(docTitle.toLowerCase(), fileEntry);
+      fileSlugMap.set(docSlug.toLowerCase(), fileEntry);
       const key = name.toLowerCase();
       if (!fileNameMap.has(key)) fileNameMap.set(key, []);
-      fileNameMap.get(key)!.push(files[files.length - 1]);
+      fileNameMap.get(key)!.push(fileEntry);
     }
 
     let highestSubFolderPositionThusFar = 0;
@@ -177,11 +200,20 @@ export function buildIndex(src: string): Index {
 
   walk(src, '', 0);
 
-  // Write master index debug file
-  const indexPath = path.join(utils.DEST, 'debug/master-index.json');
+  // Build folderMap keyed by normalizedDestDir (posix, '' for root)
+  const folderMap = new Map<string, FolderIndexEntry>();
+  for (const f of folders) {
+    const key = f.normalizedDestDir ?? utils.normalizeDestDir(f.destDir);
+    // ensure normalizedDestDir populated (idempotent)
+    f.normalizedDestDir = key;
+    folderMap.set(key, f);
+  }
+
+  // Write master index debug file (files + folders)
+  const indexPath = path.join(utils.PATH_DOCS, 'debug/master-index.json');
   fs.mkdirSync(path.dirname(indexPath), { recursive: true });
   fs.writeFileSync(indexPath, JSON.stringify({ files, folders }, null, 2), 'utf8');
   console.log(`📝 Master index written to ${indexPath}`);
 
-  return { files, folders, fileTitleMap, fileSlugMap, fileNameMap };
+  return { files, folders, fileTitleMap, fileSlugMap, fileNameMap, folderMap };
 }

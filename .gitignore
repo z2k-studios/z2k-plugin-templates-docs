@@ -5,9 +5,15 @@ unresolvedLinks.log
 # Node modules
 node_modules/
 
+# Temporary files
+temp/
+
 # Docusaurus build output
 build/
 .docusaurus/
+
+# import-obsidian script output
+sidebars.ts
 
 # Dependency lockfiles (optional)
 package-lock.json

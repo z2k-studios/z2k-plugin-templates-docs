@@ -14,8 +14,10 @@ export const TEST_JIG_FOLDER = `./scripts/import-obsidian/test-jigs`;
  * Use process.cwd() for project-root-relative paths, not __dirname (which is script-relative).
  * This ensures SRC and DEST are always relative to where the script is run from (the repo root).
  */
-export let SRC = path.resolve(process.cwd(), `../${SRC_REPO_NAME}/docs`);
-export const DEST = path.resolve(process.cwd(), './docs');
+export let SRC_DOCS = path.resolve(process.cwd(), `../${SRC_REPO_NAME}/docs`);
+export const PATH_DOCUSAURUS = path.resolve(process.cwd(), './');
+export const PATH_DOCS = path.resolve(PATH_DOCUSAURUS, './docs');
+export const PATH_DOCS_DEBUG = path.resolve(PATH_DOCS, "./debug");
 
 // This prefix is used to ignore files that start with a dot (e.g., .gitkeep, .DS_Store, etc.)
 export const IGNORE_PREFIX = '.';
@@ -65,7 +67,7 @@ export function setTesting(val: boolean) {
   if (TESTING) {
     console.log("=== TESTING MODE ENABLED ===");
     console.log(` - Only files in the '${TEST_JIG_FOLDER}' folder will be processed.`);
-    SRC = path.resolve(process.cwd(), `${TEST_JIG_FOLDER}`);
+    SRC_DOCS = path.resolve(process.cwd(), `${TEST_JIG_FOLDER}`);
   }
 }
 
@@ -88,4 +90,56 @@ export function isMedia(filename: string): boolean {
 
 export function padNumber(n: number): string {
   return n.toString().padStart(3, '0');
+}
+
+
+// ----------------------------------------------------------------------------------------------------
+// --- Folder naming Utilities ---
+// ----------------------------------------------------------------------------------------------------
+
+export function toPosix(p: string): string {
+  if (!p) return '';
+  const normalized = path.normalize(p);
+  return normalized.replace(/[\/\\]+$/, '').split(path.sep).join('/');
+}
+
+/**
+ * Remove a filename extension. "foo.md" -> "foo"
+ */
+export function stripExt(name: string): string {
+  if (!name) return '';
+  const ext = path.extname(name || '');
+  return ext ? name.slice(0, -ext.length) : name;
+}
+
+/**
+ * Normalize a destination directory string for use as a stable lookup key.
+ * - Removes leading/trailing slashes/backslashes
+ * - Converts separators to POSIX style
+ * - Collapses '.'/'..' via path.normalize
+ *
+ * Examples:
+ *   normalizeDestDir('/reference-manual/template-files/') -> 'reference-manual/template-files'
+ *   normalizeDestDir('') -> ''
+ */
+export function normalizeDestDir(p?: string | null): string {
+  if (!p) return '';
+  return toPosix(p.replace(/^[\/\\]+|[\/\\]+$/g, ''));
+}
+
+/**
+ * Compute canonical docId from destDir + destSlug.
+ * - destSlug may include extension (e.g. "why-use-templates.md"); extension is stripped.
+ * - destDir is normalized (posix, no leading/trailing slash). If destDir is '', returns just the base.
+ *
+ * Examples:
+ *   computeDocIdFromDest('reference-manual/template-files', 'why-use-templates.md')
+ *     -> 'reference-manual/template-files/why-use-templates'
+ *
+ *   computeDocIdFromDest('', 'readme.md') -> 'readme'
+ */
+export function computeDocIdFromDest(destDir: string | undefined | null, destSlug: string | undefined | null): string {
+  const dir = normalizeDestDir(destDir ?? '');
+  const base = stripExt(destSlug ?? '');
+  return dir ? `${dir}/${base}` : base;
 }
