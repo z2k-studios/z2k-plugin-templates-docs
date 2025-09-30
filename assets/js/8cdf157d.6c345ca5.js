@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkz2k_plugin_templates_docs=self.webpackChunkz2k_plugin_templates_docs||[]).push([[3149],{8882:s=>{s.exports=JSON.parse('{"authors":[{"name":"Z2K Studios","title":"Z2K Studios Team","socials":{"github":"https://github.com/z2k-studios"},"key":"z2k-studios","page":null,"count":1}]}')}}]);

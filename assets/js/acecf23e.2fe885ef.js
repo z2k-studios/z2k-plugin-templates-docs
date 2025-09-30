@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkz_2_k_plugin_templates_docs=self.webpackChunkz_2_k_plugin_templates_docs||[]).push([[1903],{1912:s=>{s.exports=JSON.parse('{"blogBasePath":"/z2k-plugin-templates-docs/blog","blogTitle":"Blog","authorsListPath":"/z2k-plugin-templates-docs/blog/authors"}')}}]);

@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkz2k_plugin_templates_docs=self.webpackChunkz2k_plugin_templates_docs||[]).push([[7472],{5513:e=>{e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"Initial Release is Ready!!","permalink":"/z2k-plugin-templates-docs/blog/initial-release","unlisted":false,"date":"2025-08-31T00:00:00.000Z"}]}')}}]);
