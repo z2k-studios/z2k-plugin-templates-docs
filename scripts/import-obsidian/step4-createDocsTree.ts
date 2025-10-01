@@ -19,4 +19,8 @@ export function createDocsTree(folders: FolderIndexEntry[]) {
     // Note: this will create the directory if it does not exist
     fs.ensureDirSync(path.join(utils.PATH_DOCS, folder.destDir));
   }
+
+  // Done!
+  utils.statusLog(`✅ Created docs tree with ${folders.length} folders in ${utils.cleanFolderNamesForConsoleOutput(utils.PATH_DOCS)}`);
+  
 }

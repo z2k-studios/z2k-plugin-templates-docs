@@ -1,5 +1,6 @@
 import slugify from './slugify.js';
 import path from 'path';
+import fs from 'fs-extra';
 
 // console.log("✅ LOADED utils.ts from", import.meta.url);
 
@@ -8,7 +9,7 @@ import path from 'path';
 // ----------------------------------------------------------------------------------------------------
 export const SRC_REPO_NAME = 'z2k-plugin-templates';
 export const DEST_REPO_NAME = 'z2k-plugin-templates-docs';
-export const TEST_JIG_FOLDER = `./scripts/import-obsidian/test-jigs`;
+export const TEST_JIG_FOLDER = `./scripts/import-obsidian/test-jigs/test-source-files`;
 
 /**
  * Use process.cwd() for project-root-relative paths, not __dirname (which is script-relative).
@@ -21,6 +22,10 @@ export const PATH_DOCS_DEBUG = path.resolve(PATH_DOCS, "./debug");
 
 // This prefix is used to ignore files that start with a dot (e.g., .gitkeep, .DS_Store, etc.)
 export const IGNORE_PREFIX = '.';
+
+// Logs
+export const LOG_WARNINGS = path.resolve(PATH_DOCS_DEBUG, './import-warnings.log');
+export const LOG_ERRORS = path.resolve(PATH_DOCS_DEBUG, './import-errors.log');
 
 
 // ----------------------------------------------------------------------------------------------------
@@ -36,8 +41,12 @@ export function cleanFolderNamesForConsoleOutput(folderName: string): string {
 }
 
 // ----------------------------------------------------------------------------------------------------
-// --- Execution Modes ---
+// --- Execution Modes and Logs ---
 // ----------------------------------------------------------------------------------------------------
+
+export function statusLog(...args: any[]) {
+  console.log('[status]', ...args);
+}
 
 export let VERBOSE = false;
 export function verboseLog(...args: any[]) {
@@ -58,6 +67,41 @@ export function debugLog(...args: any[]) {
 export function setDebug(val: boolean) {
   DEBUG = val;
 }
+
+export function initializeLogs() {
+  // Clear out any existing log files
+  if (fs.existsSync(LOG_WARNINGS)) {
+    fs.unlinkSync(LOG_WARNINGS);
+  }
+  if (fs.existsSync(LOG_ERRORS)) {
+    fs.unlinkSync(LOG_ERRORS);
+  }
+  verboseLog(`Initialized log files:`);
+  verboseLog(` - Warnings: ${cleanFolderNamesForConsoleOutput(LOG_WARNINGS)}`);
+  verboseLog(` - Errors:   ${cleanFolderNamesForConsoleOutput(LOG_ERRORS)}`);
+}
+
+export function closeLogs() {
+  verboseLog(`Completed with logs:`);
+  if (fs.existsSync(LOG_WARNINGS)) {
+    verboseLog(` - Warnings: ${cleanFolderNamesForConsoleOutput(LOG_WARNINGS)}`);
+  }
+  if (fs.existsSync(LOG_ERRORS)) {
+    verboseLog(` - Errors:   ${cleanFolderNamesForConsoleOutput(LOG_ERRORS)}`);
+  }  
+}
+
+  
+export function warningLog(...args: any[]) {
+  console.warn('[warning]', ...args);
+  fs.appendFileSync(LOG_WARNINGS, `[warning] ${args.join(' ')}\n`);
+}
+
+export function errorLog(...args: any[]) {
+  console.error('[error]', ...args);
+  fs.appendFileSync(LOG_ERRORS, `[error] ${args.join(' ')}\n`);
+}
+
 
 export let TESTING = false;
 export function setTesting(val: boolean) {

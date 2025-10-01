@@ -1,8 +1,8 @@
 ---
-title: Internal Remark Test
-slug: /_internal_remark_test
-sidebar_position: 9000
-hide_title: true
+title: Test Jig - Markdown Links
+slug: markdown-links
+sidebar_position: 20
+hide_title: false
 z2k-metadata-only: true
 ---
 

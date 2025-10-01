@@ -1,8 +1,8 @@
 ---
-title: Internal Callouts Test
-slug: /_internal_callouts_test
-sidebar_position: 9002
-hide_title: true
+title: Test Jig - Callouts
+slug: callouts
+sidebar_position: 50
+hide_title: false
 z2k-metadata-only: true
 ---
 

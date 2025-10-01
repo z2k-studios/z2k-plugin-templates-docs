@@ -213,7 +213,7 @@ export function buildIndex(src: string): Index {
   const indexPath = path.join(utils.PATH_DOCS, 'debug/master-index.json');
   fs.mkdirSync(path.dirname(indexPath), { recursive: true });
   fs.writeFileSync(indexPath, JSON.stringify({ files, folders }, null, 2), 'utf8');
-  console.log(`📝 Master index written to ${indexPath}`);
+  utils.statusLog(`📝 Master index written to ${indexPath}`);
 
   return { files, folders, fileTitleMap, fileSlugMap, fileNameMap, folderMap };
 }

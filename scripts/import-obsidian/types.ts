@@ -59,16 +59,52 @@ export type Index = {
 
   /**
    * fileTitleMap: title → file (case-insensitive)
+   *
+   * Resolves files by their *YAML title* if provided, otherwise by
+   * the fallback title inferred from the filename.
+   *
+   * Good for: human-friendly link resolution (e.g. [[Getting Started]]).
+   * Risk: titles are not unique; multiple files can share the same title.
+   *
+   * Example:
+   *   File: docs/intro.md
+   *   YAML: title: "Getting Started"
+   *   Lookup: fileTitleMap.get("getting started") → FileIndexEntry for intro.md
    */
   fileTitleMap: Map<string, FileIndexEntry>;
 
   /**
    * fileSlugMap: slug → file (case-insensitive)
+   *
+   * Resolves files by their *slug*, which is a URL-safe identifier
+   * derived from YAML `slug` if given, otherwise from the filename.
+   *
+   * Good for: stable references in documentation systems,
+   * because slugs remain consistent even if display titles change.
+   *
+   * Example:
+   *   File: docs/intro.md
+   *   YAML: slug: "getting-started"
+   *   Lookup: fileSlugMap.get("getting-started") → FileIndexEntry for intro.md
    */
   fileSlugMap: Map<string, FileIndexEntry>;
 
   /**
    * fileNameMap: filename → [files] (case-insensitive, allows duplicates)
+   *
+   * Resolves files by their *raw filename* (without extension).
+   * Unlike the other maps, this may return multiple files if
+   * different folders contain files with the same name.
+   *
+   * Good for: wikilink resolution when a user writes [[readme]]
+   * without specifying a path. Caller must disambiguate if more
+   * than one match is returned.
+   *
+   * Example:
+   *   docs/guide/readme.md
+   *   docs/setup/readme.md
+   *   Lookup: fileNameMap.get("readme") → [FileIndexEntry for guide/readme.md,
+   *                                         FileIndexEntry for setup/readme.md]
    */
   fileNameMap: Map<string, FileIndexEntry[]>;
 
@@ -79,4 +115,14 @@ export type Index = {
    * quickly resolve folder metadata by the destination directory key.
    */
   folderMap?: Map<string, FolderIndexEntry>;
+};
+
+/**
+ * Summary statistics produced during a documentation migration or copy run.
+ * Useful for reporting and debugging pipeline execution.
+ */
+export type Summary = {
+  filesCopied: number;         // Number of files successfully copied to the destination
+  wikilinksRewritten: number;  // Number of wikilinks rewritten during processing
+  unresolvedLinks: number;     // Number of links that could not be resolved to a valid file
 };

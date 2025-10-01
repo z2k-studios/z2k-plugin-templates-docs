@@ -51,7 +51,7 @@ export async function copyAndTransformFiles(index: Index, summary: Summary) {
     const debugUnresolvedPath = path.join(utils.PATH_DOCS_DEBUG, UNRESOLVED_LOG_NAME);
     fs.copyFileSync(UNRESOLVED_LOG_PATH, debugUnresolvedPath);
   } catch (e) {
-    console.warn('Could not initialize unresolved links log at', UNRESOLVED_LOG_PATH, e);
+    utils.warningLog('Could not initialize unresolved links log at', UNRESOLVED_LOG_PATH, e);
     UNRESOLVED_LOG_PATH = null;
   }
 
@@ -197,7 +197,8 @@ function z2kRemarkWikiLinkToMD(options: { index: Index, currentFile?: FileIndexE
         if (target.startsWith('#')) {
           const rawAnchor = target.replace(/^#+/, '');
           const anchor = rawAnchor.startsWith('^') ? '#^' + rawAnchor.slice(1) : '#' + utils.sluggify(rawAnchor);
-          const display = alias ? alias : target;
+          // show the header text (no leading '#') unless an alias is provided
+          const display = alias ? alias : rawAnchor.trim(); 
           newNodes.push({ type: 'link', url: anchor, children: [{ type: 'text', value: display }] });
           lastIndex = regex.lastIndex;
           continue;
@@ -234,14 +235,20 @@ function z2kRemarkWikiLinkToMD(options: { index: Index, currentFile?: FileIndexE
 
         if (entry) {
           let url = path.posix.join('/', entry.destDir.replace(/\\/g, '/'), entry.destSlug);
+          let display: string;
           if (heading) {
+            // prefer the heading text as the display when no alias is provided
             const rawHeading = String(heading).replace(/^#/, '');
             const anchor = rawHeading.startsWith('^') ? '#^' + rawHeading.slice(1) : '#' + utils.sluggify(rawHeading);
             url += anchor;
+            display = alias ? alias : rawHeading.trim();
+          } else {
+            display = alias ? alias : target;
           }
-          const display = alias ? alias : target;
           newNodes.push({ type: 'link', url, children: [{ type: 'text', value: display }] });
+
         } else {
+
           // fallback
           const s = utils.sluggify(target);
           let fallbackUrl = '/' + s;
@@ -250,8 +257,16 @@ function z2kRemarkWikiLinkToMD(options: { index: Index, currentFile?: FileIndexE
             const anchor = rawHeading.startsWith('^') ? '#^' + rawHeading.slice(1) : '#' + utils.sluggify(rawHeading);
             fallbackUrl += anchor;
           }
-          const display = alias ? alias : target;
-          newNodes.push({ type: 'link', url: fallbackUrl, children: [{ type: 'text', value: display }] });
+
+          let displayFallback: string;
+          if (heading) {
+            const rawHeading = String(heading).replace(/^#/, '');
+            displayFallback = alias ? alias : rawHeading.trim();
+          } else {
+            displayFallback = alias ? alias : target;
+          }
+          newNodes.push({ type: 'link', url: fallbackUrl, children: [{ type: 'text', value: displayFallback }] });          
+
           const inner = full.replace(/^\[\[/, '').replace(/\]\]$/, '');
 
           // Compute canonical source info and adjusted position once
@@ -265,7 +280,7 @@ function z2kRemarkWikiLinkToMD(options: { index: Index, currentFile?: FileIndexE
           // Skip logging on any internatl test files - they all begin with "_"
           if (!sourceName.startsWith('_')) {
             // Log to console (with absolute path)
-            console.warn(`${sourcePath}:${adjustedLine}:${col} - Unresolved wikilink: [[${inner}]]\n`); 
+            utils.warningLog(`${sourcePath}:${adjustedLine}:${col} - Unresolved wikilink: [[${inner}]]\n`); 
 
             // Write unresolved links to the log file (skip internal test file)
             // NOTE: I commented out the try/catch here because if you have the file open in VS Code it tends to fail writing a new version silently
@@ -319,7 +334,7 @@ export function warnOnBasenameCollisions(index: Index) {
   }
   for (const [base, list] of byBase.entries()) {
     if (list.length > 1) {
-      console.warn(`[wiki] basename collision for "${base}":\n  ${list.join("\n  ")}`);
+      utils.warningLog(`[wikilink] basename collision for "${base}":\n  ${list.join("\n  ")}`);
     }
   }
 }
@@ -391,7 +406,7 @@ function appendToUnresolvedLog(line: string) {
       utils.verboseLog('UNRESOLVED_LOG_PATH not set; skipping append for line:', line);
     }
   } catch (e) {
-    console.warn('Failed to append to unresolved links log:', UNRESOLVED_LOG_PATH, e);
+    utils.warningLog('Failed to append to unresolved links log:', UNRESOLVED_LOG_PATH, e);
   }
 }
 
@@ -491,6 +506,21 @@ function extractHeaderSection(content: string, header: string): string | null {
 
 
 
+// Helper: prefix any header-only wikilinks inside embedded content so they resolve to the
+// original file (e.g. [[#Header]] -> [[SourceFile#Header]]). This keeps anchors pointing to
+// the embedded file rather than to the host where the embed is pasted.
+function prefixEmbeddedHeaderWikilinks(text: string, prefixName: string) {
+  // match [[#Heading]] and [[#Heading|Alias]] (capture heading and alias)
+  return text.replace(/\[\[#([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_m, hdr, alias) => {
+    // preserve any caret ^ anchors (e.g. #^note)
+    if (alias) {
+      return `[[${prefixName}#${hdr}|${alias}]]`;
+    } else {
+      return `[[${prefixName}#${hdr}]]`;
+    }
+  });
+}
+
 /**
  * Expand Obsidian-style embeds (![[file]] or ![[file#header]]) inline.
  *
@@ -542,7 +572,7 @@ export function preprocessEmbeds(
         : path.join(currentDir, key + ".md");
 
       if (!fs.existsSync(targetPath)) {
-        console.warn(`Embed target not found: ${fileName} (normalized: ${key})`);
+        utils.warningLog(`Embed target not found: ${fileName} (normalized: ${key})`);
         return `> **Missing embed: ${fileName}**`;
       }
 
@@ -550,28 +580,33 @@ export function preprocessEmbeds(
       const raw = fs.readFileSync(targetPath, "utf8");
       const { content: targetContent } = matter(raw);
 
+      // Determine prefix name to use (prefer sourceName without extension).
+      const embedPrefixName = targetEntry
+        ? targetEntry.sourceName.replace(/\.[^/.]+$/, "")
+        : path.basename(targetPath, ".md");
+
       // --- Handle header embedding ---
       if (header) {
         const section = extractHeaderSection(targetContent, header);
         if (section) {
-          return section.trim();
+          // Prefix header-only wikilinks inside the embedded section to point back to the origin file
+          return prefixEmbeddedHeaderWikilinks(section.trim(), embedPrefixName);
         } else {
-          console.warn(`Header '${header}' not found in ${fileName}`);
+          utils.warningLog(`Header '${header}' not found in ${fileName}`);
           return `> **Missing embed section:** ${fileName}#${header}`;
         }
       }
 
       // No header specified → embed whole file
-      return targetContent.trim();
+      // Prefix header-only wikilinks across the whole embedded file before returning
+      return prefixEmbeddedHeaderWikilinks(targetContent.trim(), embedPrefixName);
     } catch (err) {
-      console.error(`Error embedding ${fileName}:`, err);
+      utils.errorLog(`Error embedding ${fileName} inside a file within ${currentDir}:`, err);
       return `> **Error embedding ${fileName}**`;
     }
-  });
-}
-
-
-function normalizeKey(name: string): string {
+  }
+);
+}function normalizeKey(name: string): string {
   return name.replace(/\.[^/.]+$/, "").trim().toLowerCase();
 }
 

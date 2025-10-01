@@ -13,14 +13,14 @@ import * as utils from './utils.ts'
  */
 
 export function logSummary(summary: Summary, index: Index) {
-  console.log('--- Import Summary ---');
-  console.log(`Files copied: ${summary.filesCopied}`);
-  console.log(`Wikilinks rewritten: ${summary.wikilinksRewritten || 0}`);
-  console.log(`Unresolved links: ${summary.unresolvedLinks || 0}`);
+  utils.statusLog('--- Import Summary ---');
+  utils.statusLog(`Files copied: ${summary.filesCopied}`);
+  utils.statusLog(`Wikilinks rewritten: ${summary.wikilinksRewritten || 0}`);
+  utils.statusLog(`Unresolved links: ${summary.unresolvedLinks || 0}`);
   if (utils.VERBOSE || utils.DEBUG) {
-    console.log('Title-to-path map:');
+    utils.statusLog('Title-to-path map:');
     for (const [title, entry] of index.fileTitleMap.entries()) {
-      console.log(`  "${title}" → ${entry.destDir}/${entry.destSlug}`);
+      utils.statusLog(`  "${title}" → ${entry.destDir}/${entry.destSlug}`);
     }
   }
 }

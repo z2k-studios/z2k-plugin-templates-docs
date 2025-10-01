@@ -1,8 +1,8 @@
 ---
-title: Internal Normal Markdown Test
-slug: /_internal_normal_markdown
-sidebar_position: 9010
-hide_title: true
+title: Test Jig - Basic Markdown
+slug: markdown-basics
+sidebar_position: 10
+hide_title: false
 z2k-metadata-only: true
 ---
 # Heading Level 1

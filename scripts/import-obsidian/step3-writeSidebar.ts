@@ -44,7 +44,7 @@ import * as utils from './utils.ts'
 // ------------------------------------------------------------------------------------------
 
 // Where to write the canonical, multi-sidebar file:
-const SIDEBAR_PATH = path.resolve(process.cwd(), 'sidebars.ts');
+export const SIDEBAR_PATH = path.resolve(process.cwd(), 'sidebars.ts');
 
 // Debug tree txt output (optional but useful when diagnosing ordering/IDs):
 const DEBUG_TREE_PATH = path.resolve(utils.PATH_DOCS_DEBUG, './docs-tree.txt');
@@ -133,19 +133,23 @@ export function generateSidebars(index: Index): void {
   ensureDirForFile(SIDEBAR_PATH);
   const fileText = renderSidebarsTs(sidebars);
   fs.writeFileSync(SIDEBAR_PATH, fileText, 'utf8');
-  console.log(`✅ Wrote multi-sidebar file: ${SIDEBAR_PATH}`);
+  utils.statusLog(`✅ Wrote multi-sidebar file: ${SIDEBAR_PATH}`);
 
   // Debug tree (text)
   ensureDirForFile(DEBUG_TREE_PATH);
   const treeText = renderDebugTree(docsRoot, index, folderMap, filesByFolder);
   fs.writeFileSync(DEBUG_TREE_PATH, treeText, 'utf8');
-  console.log(`✅ Wrote debug tree: ${DEBUG_TREE_PATH}`);
+  utils.statusLog(`✅ Wrote debug tree: ${DEBUG_TREE_PATH}`);
 
   // ASCII debug tree
   const asciiOutput = buildAsciiTree(index, folderMap, filesByFolder);
   ensureDirForFile(DEBUG_ASCII_TREE_PATH);
   fs.writeFileSync(DEBUG_ASCII_TREE_PATH, asciiOutput, 'utf8');
-  console.log(`✅ ASCII debug tree written to ${DEBUG_ASCII_TREE_PATH}`);
+  utils.statusLog(`✅ ASCII debug tree written to ${DEBUG_ASCII_TREE_PATH}`);
+
+  // Done
+  utils.statusLog(`🎉 Sidebars generation complete. Generated ${Object.keys(sidebars).length} sidebars.`);
+
 }
 
 
@@ -556,9 +560,9 @@ function loadIntroCrosslinks(): Array<{ id: string; label: string }> {
         // Dynamic import of TS file (requires ts-node or equivalent) --> NOTE THIS WILL LIKELY NEED ADJUSTMENT TO BE ESM COMPATIBLE - USE JSON FOR NOW
         return sanitizeCrosslinks(require('ts-node').register().load(p));
       }
-      console.warn(`[warn] Unsupported intro cross-links file extension (expected .json, .js, or .ts): ${p}`);
+      utils.warningLog(`Unsupported intro cross-links file extension (expected .json, .js, or .ts): ${p}`);
     } catch (err) {
-      console.warn(`[warn] Failed to load intro cross-links from ${p}:`, err);
+      utils.warningLog(`Failed to load intro cross-links from ${p}:`, err);
     }
   }
   utils.debugLog('No intro cross-links file found.');
@@ -781,18 +785,18 @@ function writeAsciiTree(outputPath: string, content: string) {
 
 
 function debugPrintFilesByFolder(filesByFolder: Map<string, FileIndexEntry[]>, folderMap?: Map<string, FolderIndexEntry>) {
-  console.log('=== filesByFolder keys ===');
+  utils.debugLog('=== filesByFolder keys ===');
   for (const [k, arr] of filesByFolder.entries()) {
-    console.log(`- folderKey: "${k}" -> ${arr.length} file(s)`);
+    utils.debugLog(`- folderKey: "${k}" -> ${arr.length} file(s)`);
     for (const f of arr) {
       const docId = f.docId ?? utils.computeDocIdFromDest(f.destDir, f.destSlug);
-      console.log(`    • ${f.destTitle || f.sourceName}  | destSlug="${f.destSlug}" | docId="${docId}"`);
+      utils.debugLog(`    • ${f.destTitle || f.sourceName}  | destSlug="${f.destSlug}" | docId="${docId}"`);
     }
   }
   if (folderMap) {
-    console.log('=== folderMap keys ===');
+    utils.debugLog('=== folderMap keys ===');
     for (const [k, v] of folderMap.entries()) {
-      console.log(`- folderKey: "${k}" -> folder.destTitle="${v.destTitle}", finalDestFolder="${v.finalDestFolder}"`);
+      utils.debugLog(`- folderKey: "${k}" -> folder.destTitle="${v.destTitle}", finalDestFolder="${v.finalDestFolder}"`);
     }
   }
 }

@@ -36,6 +36,12 @@ async function main() {
   utils.setTesting(process.argv.includes('-t'));
   if (utils.TESTING)   {   console.log('Test Jigs enabled');  } // Note: this will reset the SRC path to the test jig folder
 
+  utils.initializeLogs();
+  
+  // Log the source and destination paths
+  utils.verboseLog(`Source (Obsidian) folder:      ${utils.cleanFolderNamesForConsoleOutput(utils.SRC_DOCS)}`);
+  utils.verboseLog(`Destination (Docusaurus) folder: ${utils.cleanFolderNamesForConsoleOutput(utils.PATH_DOCS)}`);
+  
   // Validation
   // --------------------------------------------------------------------------------------------------
   if (!fs.existsSync(utils.SRC_DOCS)) {
@@ -78,7 +84,13 @@ async function main() {
   // --------------------------------------------------------------------------------------------------
   utils.verboseLog(`\n-----------------------------\n Step 6: Outputting summary of actions\n-----------------------------`);
   step6.logSummary(summary, index);
+
+  // Close out any log files
+  utils.closeLogs();
+
 }
+
+
 
 main().catch(err => {
   console.error('Error:', err);
