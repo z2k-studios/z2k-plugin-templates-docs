@@ -2,7 +2,7 @@ import { Index, Summary } from './types.ts';
 import * as utils from './utils.ts'
 
 // ====================================================================================================
-// Step 6: Log Summary 
+// Step 7: Log Summary 
 // ====================================================================================================
 /**
  * Logs a summary of the import process, including the number of files copied,

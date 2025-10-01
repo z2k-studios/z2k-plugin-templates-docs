@@ -543,6 +543,12 @@ function deriveSidebarKey(folder: FolderIndexEntry): string {
  */
 function loadIntroCrosslinks(): Array<{ id: string; label: string }> {
   utils.debugLog(`Looking for intro cross-links in candidates:\n${INTRO_CROSSLINK_CANDIDATES.join('\n')}`);
+
+  if (utils.TESTING) {
+    utils.debugLog('TESTING mode: skipping intro cross-links load.');
+    return [];
+  }
+
   for (const p of INTRO_CROSSLINK_CANDIDATES) {
     utils.debugLog(`Checking intro cross-links file: ${p}`);
     if (!fs.existsSync(p)) continue;

@@ -71,7 +71,7 @@ Tables:
 
 Images:
 
-![Alt text](image.png)
+! [ Alt text ] ( image.png ). -- ignoring for now.
 
 Escaping characters:
 \*literal asterisks\*

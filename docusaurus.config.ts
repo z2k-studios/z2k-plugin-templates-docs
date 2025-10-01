@@ -2,6 +2,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import rehypeCallouts from 'rehype-callouts';
+import navbarItems from './docusaurus.config.embed';
 
 /**
  * Docusaurus Config – Z2K Templates Docs
@@ -95,12 +96,7 @@ const config: Config = {
         src: 'img/z2k-system.png',
       },
       items: [
-        { type: 'docSidebar', sidebarId: 'Intro', position: 'left', label: 'Intro' },
-        { type: 'docSidebar', sidebarId: 'How To Guides', position: 'left', label: 'How To Guides' },
-        { type: 'docSidebar', sidebarId: 'Best Practices', position: 'left', label: 'Best Practices' },
-        { type: 'docSidebar', sidebarId: 'Reference Manual', position: 'left', label: 'Reference Manual' },
-        { to: '/blog', label: 'Blog', position: 'left' },
-        { href: 'https://github.com/facebook/docusaurus', label: 'GitHub', position: 'right' },
+        ...navbarItems,
       ],
     },
     footer: {

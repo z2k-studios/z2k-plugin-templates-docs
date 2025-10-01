@@ -6,7 +6,8 @@ import * as step2 from './step2-buildIndex.ts';
 import * as step3 from './step3-writeSidebar.ts'
 import * as step4 from './step4-createDocsTree.ts';
 import * as step5 from './step5-remarkFiles.ts';
-import * as step6 from './step6-summarize.ts';
+import * as step6 from './step6-writeConfigEmbed.ts';
+import * as step7 from './step7-summarize.ts';
 
 
 // ====================================================================================================
@@ -75,16 +76,21 @@ async function main() {
   fs.ensureDirSync(utils.PATH_DOCS); // Ensure the Destination root exists
   step4.createDocsTree(index.folders);
 
-  // Step 4: Initialize a summary object to track progress and statistics
+  // Step 5: Initialize a summary object to track progress and statistics
   // --------------------------------------------------------------------------------------------------
   utils.verboseLog(`\n-----------------------------\n Step 5: Using Remark to Rewrite Markdown to MDX in: ${utils.PATH_DOCS}\n-----------------------------`);
   const summary: Summary = { filesCopied: 0, wikilinksRewritten: 0, unresolvedLinks: 0 };
   await step5.copyAndTransformFiles(index, summary); // Copy and transform each file from the source to the Destination
 
-  // Step 5: Log a summary of the import process, including stats and mappings
+  // Step 6: Write out the docusaurus config embed file
+  // --------------------------------------------------------------------------------------------------
+  utils.verboseLog(`\n-----------------------------\n Step 6: Writing Docusaurus config embed file\n-----------------------------`);
+  step6.writeNavbarItems(index, utils.FILE_EMBED_CONFIG, { inferFromRoot: true });
+
+  // Step 7: Log a summary of the import process, including stats and mappings
   // --------------------------------------------------------------------------------------------------
   utils.verboseLog(`\n-----------------------------\n Step 6: Outputting summary of actions\n-----------------------------`);
-  step6.logSummary(summary, index);
+  step7.logSummary(summary, index);
 
   // Close out any log files
   utils.closeLogs();

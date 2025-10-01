@@ -20,13 +20,14 @@ export const PATH_DOCS = path.resolve(PATH_DOCUSAURUS, './docs');
 export const PATH_IMPORT_SCRIPT = path.resolve(PATH_DOCUSAURUS, './scripts/import-obsidian');
 export const PATH_DOCS_DEBUG = path.resolve(PATH_IMPORT_SCRIPT, "./debug");
 export const PATH_TEST_JIG_FOLDER = path.resolve(PATH_IMPORT_SCRIPT, './test-jigs/test-source-files');
-
-// This prefix is used to ignore files that start with a dot (e.g., .gitkeep, .DS_Store, etc.)
-export const IGNORE_PREFIX = '.';
+export const FILE_EMBED_CONFIG = path.resolve(PATH_DOCUSAURUS, './docusaurus.config.embed.ts');
 
 // Logs
 export const LOG_WARNINGS = path.resolve(PATH_DOCS_DEBUG, './~import-warnings.log');
 export const LOG_ERRORS = path.resolve(PATH_DOCS_DEBUG, './~import-errors.log');
+
+// This prefix is used to ignore files that start with a dot (e.g., .gitkeep, .DS_Store, etc.)
+export const IGNORE_PREFIX = '.';
 
 
 // ----------------------------------------------------------------------------------------------------
