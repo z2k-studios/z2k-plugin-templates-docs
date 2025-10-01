@@ -35,7 +35,8 @@ export async function copyAndTransformFiles(index: Index, summary: Summary) {
   UNRESOLVED_LOG_PATH = path.join(utils.SRC_DOCS, UNRESOLVED_LOG_NAME);
   try {
     fs.ensureDirSync(utils.SRC_DOCS);
-    const header = `# This file is created by the import-obsidian script (and its typescript step routines - specifically step4-remarkFiles.ts).
+    const header = 
+`# This file is created by the import-obsidian script (and its typescript step routines - specifically step4-remarkFiles.ts).
 # It is intended to allow the user to have clickable links for VS Code into the documentation source files for unresolved links.
 # To use these as clickable links:
 #    1) open the Z2K System Workspace in VS Code

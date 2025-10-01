@@ -7,6 +7,7 @@ node_modules/
 
 # Temporary files
 temp/
+debug/
 
 # Docusaurus build output
 build/

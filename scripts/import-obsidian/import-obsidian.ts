@@ -37,7 +37,8 @@ async function main() {
   if (utils.TESTING)   {   console.log('Test Jigs enabled');  } // Note: this will reset the SRC path to the test jig folder
 
   utils.initializeLogs();
-  
+
+
   // Log the source and destination paths
   utils.verboseLog(`Source (Obsidian) folder:      ${utils.cleanFolderNamesForConsoleOutput(utils.SRC_DOCS)}`);
   utils.verboseLog(`Destination (Docusaurus) folder: ${utils.cleanFolderNamesForConsoleOutput(utils.PATH_DOCS)}`);

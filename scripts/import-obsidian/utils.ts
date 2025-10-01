@@ -9,7 +9,6 @@ import fs from 'fs-extra';
 // ----------------------------------------------------------------------------------------------------
 export const SRC_REPO_NAME = 'z2k-plugin-templates';
 export const DEST_REPO_NAME = 'z2k-plugin-templates-docs';
-export const TEST_JIG_FOLDER = `./scripts/import-obsidian/test-jigs/test-source-files`;
 
 /**
  * Use process.cwd() for project-root-relative paths, not __dirname (which is script-relative).
@@ -18,7 +17,9 @@ export const TEST_JIG_FOLDER = `./scripts/import-obsidian/test-jigs/test-source-
 export let SRC_DOCS = path.resolve(process.cwd(), `../${SRC_REPO_NAME}/docs`);
 export const PATH_DOCUSAURUS = path.resolve(process.cwd(), './');
 export const PATH_DOCS = path.resolve(PATH_DOCUSAURUS, './docs');
-export const PATH_DOCS_DEBUG = path.resolve(PATH_DOCS, "./debug");
+export const PATH_IMPORT_SCRIPT = path.resolve(PATH_DOCUSAURUS, './scripts/import-obsidian');
+export const PATH_DOCS_DEBUG = path.resolve(PATH_IMPORT_SCRIPT, "./debug");
+export const PATH_TEST_JIG_FOLDER = path.resolve(PATH_IMPORT_SCRIPT, './test-jigs/test-source-files');
 
 // This prefix is used to ignore files that start with a dot (e.g., .gitkeep, .DS_Store, etc.)
 export const IGNORE_PREFIX = '.';
@@ -74,7 +75,7 @@ export function initializeLogs() {
 `# This file is created by the import-obsidian script.
 # To use these as clickable links:
 #    1) go to the 'docs' folder in VSCode's terminal window
-#    2) cat this file [ clear && cat unresolvedLinks.log ]
+#    2) cat this file [ clear && cat xxx.log ]
 #    3) Command-Click each link below to open the source file at the specified line/column.
 # ---------------------------------------------------------------------------------------------------------------------------
 #
@@ -125,8 +126,8 @@ export function setTesting(val: boolean) {
   // Reset the source folder to use the test jig folder
   if (TESTING) {
     console.log("=== TESTING MODE ENABLED ===");
-    console.log(` - Only files in the '${TEST_JIG_FOLDER}' folder will be processed.`);
-    SRC_DOCS = path.resolve(process.cwd(), `${TEST_JIG_FOLDER}`);
+    console.log(` - Only files in the '${PATH_TEST_JIG_FOLDER}' folder will be processed.`);
+    SRC_DOCS = path.resolve(process.cwd(), `${PATH_TEST_JIG_FOLDER}`);
   }
 }
 
