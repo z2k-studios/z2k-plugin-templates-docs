@@ -10,6 +10,8 @@ import { visit } from 'unist-util-visit';
 import { Index, Summary, FileIndexEntry } from './types.ts';
 import * as utils from './utils.ts'
 
+// VERSION 1.1.0
+
 // ====================================================================================================
 // Constants
 // ====================================================================================================
@@ -100,7 +102,8 @@ async function copyAndTransformAFile(file: Index['files'][number], index: Index,
     }
 
     // Expand Obsidian embeds before remark parses content
-    content = preprocessEmbeds(content, index, path.dirname(file.sourcePath));
+    // NOTE: pass the current file sourcePath so preprocessEmbeds can resolve ![[#Heading]] self-embeds.
+    content = preprocessEmbeds(content, index, path.dirname(file.sourcePath), file.sourcePath);
 
     // my custom options for remark-stringify
     // See: https://www.npmjs.com/package/remark-stringify
@@ -228,14 +231,26 @@ function z2kRemarkWikiLinkToMD(options: { index: Index, currentFile?: FileIndexE
         if (!entry) entry = options.index.fileTitleMap.get(key);
         if (!entry) entry = options.index.fileSlugMap.get(key);
 
-        // slugified fallback lookup
+        // slugified / normalized fallback lookup (handle explicit .md or name variants)
         if (!entry) {
-          const s = utils.sluggify(target);
-          entry = options.index.fileSlugMap.get(s) || options.index.fileNameMap.get(s)?.[0] || options.index.fileTitleMap.get(s);
+          // Prefer a normalized key without file extension for lookups
+          const targetNoExt = String(target || '').replace(/\.md$/i, '').trim();
+          const normalizedKey = utils.normalizeFileKey(targetNoExt); // uses same normalization as other lookups
+
+          // Try slug map (slugify the no-ext value), then fileNameMap/title maps by normalized key,
+          // then as a last resort try the slugified no-ext again via fileNameMap (covers edge cases).
+          const s = utils.sluggify(targetNoExt);
+          entry =
+            options.index.fileSlugMap.get(s) ||
+            options.index.fileNameMap.get(normalizedKey)?.[0] ||
+            options.index.fileTitleMap.get(normalizedKey) ||
+            options.index.fileNameMap.get(s)?.[0];
         }
 
         if (entry) {
-          let url = path.posix.join('/', entry.destDir.replace(/\\/g, '/'), entry.destSlug);
+          // Build canonical URL base (helper keeps logic tidy and handles explicit .md or path-like sources)
+          const urlBase = buildWikilinkUrlBase(target, entry);
+          let url = urlBase;
           let display: string;
           if (heading) {
             // prefer the heading text as the display when no alias is provided
@@ -505,7 +520,54 @@ function extractHeaderSection(content: string, header: string): string | null {
   return section.join("\n").trim();
 }
 
+ 
+/**
+ * Build canonical URL base for a wikilink target.
+ *
+ * Priority:
+ *  1) Use entry.docId when present (already canonical: destDir/stripExt(destSlug)).
+ *  2) If entry exists but docId missing, compute docId via utils.computeDocIdFromDest(entry.destDir, entry.destSlug).
+ *  3) If no entry, but the author used a path or explicit .md, preserve author intent while slugifying each segment.
+ *  4) Final fallback: slugify the entire target and return a root-based path.
+ *
+ * Returns a posix-style absolute path suitable for Docusaurus (leading slash, no extension).
+ */
+function buildWikilinkUrlBase(target: string, entry?: FileIndexEntry): string {
+  // 1) Prefer canonical docId when available
+  if (entry && entry.docId) {
+    return path.posix.join('/', entry.docId.replace(/\\/g, '/'));
+  }
 
+  // 2) If entry exists, compute a docId from destDir/destSlug (centralized logic)
+  if (entry) {
+    try {
+      const computed = utils.computeDocIdFromDest(entry.destDir, entry.destSlug);
+      if (computed) {
+        return path.posix.join('/', String(computed).replace(/\\/g, '/'));
+      }
+    } catch (e) {
+      utils.warningLog('buildWikilinkUrlBase: computeDocIdFromDest failed for', entry?.sourcePath, e);
+      // fall through to heuristic behavior below
+    }
+  }
+
+  // Normalize the incoming target string
+  const raw = String(target || '').trim();
+
+  // 3) If the author wrote a path or included .md, preserve that structure but slugify each segment
+  if (raw.includes('/') || /\.md$/i.test(raw)) {
+    const normalizedTarget = raw.replace(/\.md$/i, '').replace(/\\/g, '/').replace(/^\.\//, '');
+    const safePath = normalizedTarget
+      .split('/')
+      .map(seg => utils.sluggify(seg.trim()))
+      .filter(Boolean)
+      .join('/');
+    return path.posix.join('/', safePath);
+  }
+
+  // 4) Final fallback: slugify whole target
+  return '/' + utils.sluggify(raw);
+}
 
 // Helper: prefix any header-only wikilinks inside embedded content so they resolve to the
 // original file (e.g. [[#Header]] -> [[SourceFile#Header]]). This keeps anchors pointing to
@@ -544,42 +606,72 @@ function prefixEmbeddedHeaderWikilinks(text: string, prefixName: string) {
 export function preprocessEmbeds(
   content: string,
   index: Index,
-  currentDir: string
+  currentDir: string,
+  currentFilePath?: string
 ): string {
-  // Match ![[file]] and ![[file#header]]
-  const embedPattern = /!\[\[([^\]#]+)(?:#([^\]]+))?\]\]/g;
+  // Match anything inside ![[...]] and parse it ourselves (robust to leading '#' for header-only embeds)
+  const embedPattern = /!\[\[([^\]]+)\]\]/g;
 
-  return content.replace(embedPattern, (match, fileName, header) => {
+  return content.replace(embedPattern, (match, payload) => {
     try {
+      // Parse payload into fileNamePart and headerPart
+      // e.g. "file" => fileNamePart="file", headerPart=undefined
+      //      "file#Header" => fileNamePart="file", headerPart="Header"
+      //      "#Header" => fileNamePart="", headerPart="Header"  (self-embed)
+      const raw = String(payload || '').trim();
+      const hashIndex = raw.indexOf('#');
+      let fileNamePart = raw;
+      let headerPart: string | undefined = undefined;
+      if (hashIndex === 0) {
+        // payload begins with '#' -> header-only embed of current file
+        fileNamePart = '';
+        headerPart = raw.slice(1);
+      } else if (hashIndex > 0) {
+        fileNamePart = raw.slice(0, hashIndex);
+        headerPart = raw.slice(hashIndex + 1);
+      }
+
       // --- Resolve target file ---
       let targetEntry: FileIndexEntry | undefined;
-      const key = normalizeKey(fileName);
+      const key = utils.normalizeFileKey(fileNamePart);
 
-      // 1. Try filename map (may return multiple entries, pick first for now)
-      const nameMatches = index.fileNameMap.get(key);
-      if (nameMatches && nameMatches.length > 0) {
-        targetEntry = nameMatches[0];
+      // Header-only self-embed: use the current file
+      if (!fileNamePart) {
+        if (!currentFilePath) {
+          utils.warningLog(`Header-only embed encountered but currentFilePath not provided. Payload: ${payload}`);
+          return `> **Missing embed (unknown source): ${payload}**`;
+        }
+        // Try to find the index entry for the current file
+        targetEntry = index.files.find(f => f.sourcePath === currentFilePath);
+      } else {
+        // 1. Try filename map (may return multiple entries, pick first for now)
+        const nameMatches = index.fileNameMap.get(key);
+        if (nameMatches && nameMatches.length > 0) {
+          targetEntry = nameMatches[0];
+        }
+
+        // 2. Try slug map
+        if (!targetEntry) {
+          const slugMatch = index.fileSlugMap.get(key);
+          if (slugMatch) targetEntry = slugMatch;
+        }
+
+        // 3. Fallback: relative guess
+        // will be resolved to currentDir/<key>.md if not found in index
       }
 
-      // 2. Try slug map
-      if (!targetEntry) {
-        const slugMatch = index.fileSlugMap.get(key);
-        if (slugMatch) targetEntry = slugMatch;
-      }
-
-      // 3. Fallback: relative guess
       const targetPath = targetEntry
         ? targetEntry.sourcePath
-        : path.join(currentDir, key + ".md");
+        : (fileNamePart ? path.join(currentDir, key + ".md") : currentFilePath || path.join(currentDir, 'index.md'));
 
       if (!fs.existsSync(targetPath)) {
-        utils.warningLog(`Embed target not found: ${fileName} (normalized: ${key})`);
-        return `> **Missing embed: ${fileName}**`;
+        utils.warningLog(`Embed target not found: ${fileNamePart || '#'+(headerPart||'') } (normalized: ${key}) in ${currentDir}`);
+        return `> **Missing embed: ${fileNamePart || '#'+(headerPart||'')}**`;
       }
 
       // --- Read file and strip YAML frontmatter ---
-      const raw = fs.readFileSync(targetPath, "utf8");
-      const { content: targetContent } = matter(raw);
+      const rawFile = fs.readFileSync(targetPath, "utf8");
+      const { content: targetContent } = matter(rawFile);
 
       // Determine prefix name to use (prefer sourceName without extension).
       const embedPrefixName = targetEntry
@@ -587,14 +679,14 @@ export function preprocessEmbeds(
         : path.basename(targetPath, ".md");
 
       // --- Handle header embedding ---
-      if (header) {
-        const section = extractHeaderSection(targetContent, header);
+      if (headerPart) {
+        const section = extractHeaderSection(targetContent, headerPart);
         if (section) {
           // Prefix header-only wikilinks inside the embedded section to point back to the origin file
           return prefixEmbeddedHeaderWikilinks(section.trim(), embedPrefixName);
         } else {
-          utils.warningLog(`Header '${header}' not found in ${fileName}`);
-          return `> **Missing embed section:** ${fileName}#${header}`;
+          utils.warningLog(`Header '${headerPart}' not found in ${fileNamePart || path.basename(targetPath)}`);
+          return `> **Missing embed section:** ${fileNamePart || path.basename(targetPath)}#${headerPart}`;
         }
       }
 
@@ -602,13 +694,9 @@ export function preprocessEmbeds(
       // Prefix header-only wikilinks across the whole embedded file before returning
       return prefixEmbeddedHeaderWikilinks(targetContent.trim(), embedPrefixName);
     } catch (err) {
-      utils.errorLog(`Error embedding ${fileName} inside a file within ${currentDir}:`, err);
-      return `> **Error embedding ${fileName}**`;
+      utils.errorLog(`Error embedding ${payload} inside a file within ${currentDir}:`, err);
+      return `> **Error embedding ${payload}**`;
     }
-  }
-);
-}function normalizeKey(name: string): string {
-  return name.replace(/\.[^/.]+$/, "").trim().toLowerCase();
+  });
 }
-
 

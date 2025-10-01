@@ -157,7 +157,20 @@ export function padNumber(n: number): string {
 // --- Folder naming Utilities ---
 // ----------------------------------------------------------------------------------------------------
 
-export function toPosix(p: string): string {
+/**
+ * Normalize a path string to POSIX format.
+ * What it does:
+ * - Runs through path.normalize (which resolves redundant ./.., collapses multiple separators).
+ * - Removes any trailing slash/backslash.
+ * - Converts separators (\ → /) so you get a cross-platform consistent format.
+ *
+ * Example:
+ * - toPosixPath('foo\\bar\\..\\baz\\') → "foo/baz"
+ * 
+ * @param p A path string
+ * @returns 
+ */
+export function toPosixPath(p: string): string {
   if (!p) return '';
   const normalized = path.normalize(p);
   return normalized.replace(/[\/\\]+$/, '').split(path.sep).join('/');
@@ -180,12 +193,34 @@ export function stripExt(name: string): string {
  *
  * Examples:
  *   normalizeDestDir('/reference-manual/template-files/') -> 'reference-manual/template-files'
+ *   normalizeDestDir('/foo/bar/') → "foo/bar"
+ *   normalizeDestDir('\\foo\\bar\\') → "foo/bar"
  *   normalizeDestDir('') -> ''
  */
 export function normalizeDestDir(p?: string | null): string {
   if (!p) return '';
-  return toPosix(p.replace(/^[\/\\]+|[\/\\]+$/g, ''));
+  return toPosixPath(p.replace(/^[\/\\]+|[\/\\]+$/g, ''));
 }
+
+
+/**
+ * Normalize a file name string for use as a stable lookup key.
+ * - Removes the final file extension
+ * - Trims leading/trailing whitespace
+ * - Converts to lowercase for case-insensitive comparison
+ * - Note: operates only on the file name string itself,
+ *   not on full paths (directories are not stripped)
+ *
+ * Examples:
+ *   normalizeFileKey('MyFile.TXT')      -> 'myfile'
+ *   normalizeFileKey('archive.tar.gz')  -> 'archive.tar'
+ *   normalizeFileKey(' Report.DOCX ')   -> 'report'
+ */
+export function normalizeFileKey(name: string): string {
+  return name.replace(/\.[^/.]+$/, "").trim().toLowerCase();
+}
+
+
 
 /**
  * Compute canonical docId from destDir + destSlug.

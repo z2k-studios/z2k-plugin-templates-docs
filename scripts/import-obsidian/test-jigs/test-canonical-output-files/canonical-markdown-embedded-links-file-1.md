@@ -31,8 +31,8 @@ Cross-file links - Using destination Slug:
 
 Cross-file links - Using destination slug AND alias:
 
-- [Embed A (with no file ext)](/markdown-embedded-links-file-2-slug.md#linkto-section-a-in-file-2)
-- [Embed A (explicit)](/markdown-embedded-links-file-2-slugmd#linkto-section-a-in-file-2)
+- [Embed A (with no file ext)](/markdown-embedded-links-file-2-slug#linkto-section-a-in-file-2)
+- [Embed A (explicit)](/markdown-embedded-links-file-2-slug#linkto-section-a-in-file-2)
 
 ---
 
@@ -84,7 +84,7 @@ Intro paragraph for Embed Section A.
 
 - Local reference (in original file): [Embed Subheader in File 2](/markdown-embedded-links-file-2-slug#embed-subheader-in-file-2)
 - Local reference with alias: [See Subheader](/markdown-embedded-links-file-2-slug#embed-subheader-in-file-2)
-- Caret-style anchor (local): [^note](/markdown-embedded-links-file-2-slug.md#^note)
+- Caret-style anchor (local): [^note](/markdown-embedded-links-file-2-slug#^note)
 - Regular page link (other page): [callouts](/callouts) and [Embedded Links File 1](/markdown-embedded-links-file-1)
 
 ## Embed Subheader in File 2
@@ -118,7 +118,7 @@ Intro paragraph for Embed Section A.
 
 - Local reference (in original file): [Embed Subheader in File 2](/markdown-embedded-links-file-2-slug#embed-subheader-in-file-2)
 - Local reference with alias: [See Subheader](/markdown-embedded-links-file-2-slug#embed-subheader-in-file-2)
-- Caret-style anchor (local): [^note](/markdown-embedded-links-file-2-slug.md#^note)
+- Caret-style anchor (local): [^note](/markdown-embedded-links-file-2-slug#^note)
 - Regular page link (other page): [callouts](/callouts) and [Embedded Links File 1](/markdown-embedded-links-file-1)
 
 ## Embed Subheader in File 2
@@ -134,7 +134,6 @@ This is the subheader content. It has a bit of text and a small list:
 
 Some text. Contains a local header-only link: [Go to Another Header](/markdown-embedded-links-file-2-slug#linkto-section-b-in-file-2)
 
-
 # Embedded Cross Links in File 1 of a section of file 2
 
 ---
@@ -148,7 +147,7 @@ Intro paragraph for Embed Section A.
 - Local reference (in original file): [Embed Subheader in File 2](/markdown-embedded-links-file-2-slug#embed-subheader-in-file-2)
 - Local reference with alias: [See Subheader](/markdown-embedded-links-file-2-slug#embed-subheader-in-file-2)
 - Caret-style anchor (local): [^note](/markdown-embedded-links-file-2-slug#^note)
-- Regular page link (other page): [callouts](/callouts.md) and [Embedded Links File 1](/markdown-embedded-links-file-1)
+- Regular page link (other page): [callouts](/callouts) and [Embedded Links File 1](/markdown-embedded-links-file-1)
 
 ## Embed Subheader in File 2
 
@@ -170,7 +169,7 @@ Intro paragraph for Embed Section A.
 - Local reference (in original file): [Embed Subheader in File 2](/markdown-embedded-links-file-2-slug#embed-subheader-in-file-2)
 - Local reference with alias: [See Subheader](/markdown-embedded-links-file-2-slug#embed-subheader-in-file-2)
 - Caret-style anchor (local): [^note](/markdown-embedded-links-file-2-slug#^note)
-- Regular page link (other page): [callouts](/callouts.md) and [Embedded Links File 1](/markdown-embedded-links-file-1)
+- Regular page link (other page): [callouts](/callouts) and [Embedded Links File 1](/markdown-embedded-links-file-1)
 
 ## Embed Subheader in File 2
 

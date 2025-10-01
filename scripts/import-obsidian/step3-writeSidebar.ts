@@ -83,7 +83,7 @@ export function generateSidebars(index: Index): void {
   const folderMap = new Map<string, FolderIndexEntry>();
   for (const f of index.folders) {
     const raw = (f.normalizedDestDir ?? f.destDir ?? '').replace(/^[/\\]+|[/\\]+$/g, '');
-    const key = utils.toPosix(raw); // '' for docs root
+    const key = utils.toPosixPath(raw); // '' for docs root
     folderMap.set(key, f);
   }
 
@@ -102,7 +102,7 @@ export function generateSidebars(index: Index): void {
 
   // canonical docs root dest key (posix, no leading/trailing slash)
   const docsRootRaw = (docsRoot.normalizedDestDir ?? docsRoot.destDir ?? '').replace(/^[/\\]+|[/\\]+$/g, '');
-  const docsRootDest = utils.toPosix(docsRootRaw);
+  const docsRootDest = utils.toPosixPath(docsRootRaw);
 
   // container for sidebars
   const sidebars: Record<string, any[]> = {};
@@ -114,7 +114,7 @@ export function generateSidebars(index: Index): void {
   const topLevelFolders = index.folders
     .filter((f) => {
       const fRaw = (f.normalizedDestDir ?? f.destDir ?? '').replace(/^[/\\]+|[/\\]+$/g, '');
-      const fDestPosix = utils.toPosix(fRaw);
+      const fDestPosix = utils.toPosixPath(fRaw);
 
       // relative path from docsRootDest to fDestPosix
       const rel = path.posix.relative(docsRootDest, fDestPosix);
@@ -171,7 +171,7 @@ function buildIntroSidebar(
 
   // Root docs (destDir === '')
   const rootKey = (docsRoot.normalizedDestDir ?? docsRoot.destDir ?? '').toString().replace(/^[/\\]+|[/\\]+$/g, '');
-  const rootKeyPosix = utils.toPosix(rootKey);
+  const rootKeyPosix = utils.toPosixPath(rootKey);
   const rootFiles = (filesByFolder.get(rootKeyPosix) || [])
     .filter((f) => isMarkdownOrText(f.destSlug))
     .sort((a, b) => cmpByPosThenLabel(a, b, (x) => x.sidebarPosition, (x) => x.destTitle));
@@ -248,7 +248,7 @@ function buildTopLevelSidebar(
 ): any[] {
   const items: any[] = [];
 
-  const folderKey = utils.toPosix(((folder.normalizedDestDir ?? folder.destDir ?? '') as string).replace(/^[/\\]+|[/\\]+$/g, ''));
+  const folderKey = utils.toPosixPath(((folder.normalizedDestDir ?? folder.destDir ?? '') as string).replace(/^[/\\]+|[/\\]+$/g, ''));
   const folderFiles = (filesByFolder.get(folderKey) || []).filter((f) => isMarkdownOrText(f.destSlug));
   const indexDoc = detectIndexDoc(folder, folderFiles);
 
@@ -314,7 +314,7 @@ function buildCategory(
   const label = safeTitle(folder.destTitle || folder.finalDestFolder || folder.sourceName);
 
   // get files for this folder (dest-key)
-  const folderKey = utils.toPosix(((folder.normalizedDestDir ?? folder.destDir ?? '') as string).replace(/^[/\\]+|[/\\]+$/g, ''));
+  const folderKey = utils.toPosixPath(((folder.normalizedDestDir ?? folder.destDir ?? '') as string).replace(/^[/\\]+|[/\\]+$/g, ''));
   const folderFiles = (filesByFolder.get(folderKey) || []).filter((f) => isMarkdownOrText(f.destSlug));
   const indexDoc = detectIndexDoc(folder, folderFiles);
 
@@ -368,7 +368,7 @@ function buildCategory(
  */
 function detectIndexDoc(folder: FolderIndexEntry, files: FileIndexEntry[]): FileIndexEntry | undefined {
   const folderKey = (folder.normalizedDestDir ?? folder.destDir ?? '').toString().replace(/^[/\\]+|[/\\]+$/g, '');
-  const folderPosix = utils.toPosix(folderKey);
+  const folderPosix = utils.toPosixPath(folderKey);
 
   // folder base candidates (slug or finalDestFolder or sourceName)
   const folderBases = [
@@ -430,7 +430,7 @@ function buildDocId(file: FileIndexEntry, _folderMap?: Map<string, FolderIndexEn
 
   // 2) Fallback: compute from destDir + destSlug (strip extension)
   const destDirRaw = file.normalizedDestDir ?? (file.destDir ?? '');
-  const destDir = utils.toPosix(String(destDirRaw).replace(/^[/\\]+|[/\\]+$/g, ''));
+  const destDir = utils.toPosixPath(String(destDirRaw).replace(/^[/\\]+|[/\\]+$/g, ''));
   const slugNoExt = stripExt(file.destSlug ?? file.sourceName ?? '');
   return destDir ? `${destDir}/${slugNoExt}` : slugNoExt;
 }
@@ -440,7 +440,7 @@ function groupFilesByFolder(files: FileIndexEntry[]): Map<string, FileIndexEntry
   for (const f of files) {
     // prefer normalizedDestDir produced by step2, fall back to destDir
     const rawKey = (f as any).normalizedDestDir ?? f.destDir ?? '';
-    const key = utils.toPosix(String(rawKey).replace(/^[/\\]+|[/\\]+$/g, ''));
+    const key = utils.toPosixPath(String(rawKey).replace(/^[/\\]+|[/\\]+$/g, ''));
     const arr = map.get(key) || [];
     arr.push(f);
     map.set(key, arr);

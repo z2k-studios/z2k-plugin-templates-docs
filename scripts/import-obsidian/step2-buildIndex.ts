@@ -159,7 +159,7 @@ export function buildIndex(src: string): Index {
       // create file entry and include normalized dest dir + docId + normalizedDestPath for downstream
       const normalizedDestDirForFile = utils.normalizeDestDir(destDir);
       const docId = utils.computeDocIdFromDest(destDir, destSlugWithExt);
-      const normalizedDestPath = utils.toPosix(path.join(destDir, destSlugWithExt));
+      const normalizedDestPath = utils.toPosixPath(path.join(destDir, destSlugWithExt));
 
       const fileEntry: FileIndexEntry = {
         sourcePath,
@@ -210,7 +210,7 @@ export function buildIndex(src: string): Index {
   }
 
   // Write master index debug file (files + folders)
-  const indexPath = path.join(utils.PATH_DOCS, 'debug/master-index.json');
+  const indexPath = path.join(utils.PATH_DOCS_DEBUG, 'master-index.json');
   fs.mkdirSync(path.dirname(indexPath), { recursive: true });
   fs.writeFileSync(indexPath, JSON.stringify({ files, folders }, null, 2), 'utf8');
   utils.statusLog(`📝 Master index written to ${indexPath}`);

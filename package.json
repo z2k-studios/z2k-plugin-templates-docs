@@ -8,6 +8,7 @@
     "z2k-test": "zsh 3-test.sh",
     "z2k-deploy": "zsh 4-deploy.sh",
     "z2k-clean": "zsh 5-clean.sh",
+    "show-test-jig-diffs": "zsh ./scripts/import-obsidian/test-jigs/show-test-jig-diffs.zsh",
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "build": "docusaurus build",
