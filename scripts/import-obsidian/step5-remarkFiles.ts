@@ -280,7 +280,7 @@ function z2kRemarkWikiLinkToMD(options: { index: Index, currentFile?: FileIndexE
           // Skip logging on any internatl test files - they all begin with "_"
           if (!sourceName.startsWith('_')) {
             // Log to console (with absolute path)
-            utils.warningLog(`${sourcePath}:${adjustedLine}:${col} - Unresolved wikilink: [[${inner}]]\n`); 
+            utils.warningLog(`${sourcePath}:${adjustedLine}:${col} - Unresolved wikilink: [[${inner}]]`); 
 
             // Write unresolved links to the log file (skip internal test file)
             // NOTE: I commented out the try/catch here because if you have the file open in VS Code it tends to fail writing a new version silently

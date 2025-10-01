@@ -24,8 +24,8 @@ export const PATH_DOCS_DEBUG = path.resolve(PATH_DOCS, "./debug");
 export const IGNORE_PREFIX = '.';
 
 // Logs
-export const LOG_WARNINGS = path.resolve(PATH_DOCS_DEBUG, './import-warnings.log');
-export const LOG_ERRORS = path.resolve(PATH_DOCS_DEBUG, './import-errors.log');
+export const LOG_WARNINGS = path.resolve(PATH_DOCS_DEBUG, './~import-warnings.log');
+export const LOG_ERRORS = path.resolve(PATH_DOCS_DEBUG, './~import-errors.log');
 
 
 // ----------------------------------------------------------------------------------------------------
@@ -69,13 +69,28 @@ export function setDebug(val: boolean) {
 }
 
 export function initializeLogs() {
-  // Clear out any existing log files
+
+  let logFilePreface = 
+`# This file is created by the import-obsidian script.
+# To use these as clickable links:
+#    1) go to the 'docs' folder in VSCode's terminal window
+#    2) cat this file [ clear && cat unresolvedLinks.log ]
+#    3) Command-Click each link below to open the source file at the specified line/column.
+# ---------------------------------------------------------------------------------------------------------------------------
+#
+`
+
+  // Clear out any existing log files and initialized them with a reminder preface
   if (fs.existsSync(LOG_WARNINGS)) {
     fs.unlinkSync(LOG_WARNINGS);
   }
+  fs.appendFileSync(LOG_WARNINGS, logFilePreface, 'utf8');
+
   if (fs.existsSync(LOG_ERRORS)) {
     fs.unlinkSync(LOG_ERRORS);
   }
+  fs.appendFileSync(LOG_ERRORS, logFilePreface, 'utf8');
+
   verboseLog(`Initialized log files:`);
   verboseLog(` - Warnings: ${cleanFolderNamesForConsoleOutput(LOG_WARNINGS)}`);
   verboseLog(` - Errors:   ${cleanFolderNamesForConsoleOutput(LOG_ERRORS)}`);
