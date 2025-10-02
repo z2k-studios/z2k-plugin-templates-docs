@@ -609,15 +609,114 @@ export function preprocessEmbeds(
   currentDir: string,
   currentFilePath?: string
 ): string {
-  // Match anything inside ![[...]] and parse it ourselves (robust to leading '#' for header-only embeds)
+  // Build ranges to skip: fenced code blocks (```/~~~) and indented code blocks (4 spaces or a tab)
+  const skipRanges: Array<{ start: number; end: number }> = [];
+
+  // Helper to add a range
+  const addRange = (s: number, e: number) => {
+    if (e > s) skipRanges.push({ start: s, end: e });
+  };
+
+  // Line-based scan to discover fenced and indented code blocks with offsets
+  const lines = content.split('\n');
+  let offset = 0;
+  let inFenced = false;
+  let fenceMarker = '';
+  let fenceStart = -1;
+  let inIndented = false;
+  let indentedStart = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // compute line start and end offsets (preserve newline length except for last line)
+    const lineLen = i < lines.length - 1 ? line.length + 1 : line.length;
+    const lineStart = offset;
+    const lineEnd = offset + lineLen;
+
+    // Check fenced fences first
+    if (!inFenced) {
+      const m = line.match(/^[ \t]*([`~]{3,})/);
+      if (m) {
+        inFenced = true;
+        fenceMarker = m[1]; // e.g. "```" or "~~~~"
+        fenceStart = lineStart;
+        // continue; we remain in fenced until closing found
+      }
+    } else {
+      // we are in a fenced block, check for closing fence (line starting with same marker)
+      const trimmed = line.trim();
+      if (trimmed.startsWith(fenceMarker)) {
+        // include the closing fence line in the range
+        addRange(fenceStart, lineEnd);
+        inFenced = false;
+        fenceMarker = '';
+        fenceStart = -1;
+        // continue scanning
+      }
+    }
+
+    // If fenced, don't attempt indented detection for this line
+    if (!inFenced) {
+      // detect indented code (4 spaces or a tab)
+      if (!inIndented && (/^( {4}|\t)/).test(line)) {
+        inIndented = true;
+        indentedStart = lineStart;
+      } else if (inIndented && !(/^( {4}|\t)/).test(line)) {
+        // ended indented block at previous line end
+        addRange(indentedStart, lineStart);
+        inIndented = false;
+        indentedStart = -1;
+      }
+    }
+
+    offset = lineEnd;
+  }
+
+  // If file ended while still in a fenced block, close to EOF
+  if (inFenced && fenceStart >= 0) {
+    addRange(fenceStart, content.length);
+  }
+  // If file ended while still in an indented block, close to EOF
+  if (inIndented && indentedStart >= 0) {
+    addRange(indentedStart, content.length);
+  }
+
+  // Next: find inline code spans (backtick delimited) that are NOT inside any existing skip range.
+  // We'll use /(`+)([\s\S]*?)\1/g to capture proper backtick-run code spans.
+  const inlineCodeRe = /(`+)([\s\S]*?)\1/g;
+  let mInline: RegExpExecArray | null;
+  while ((mInline = inlineCodeRe.exec(content)) !== null) {
+    const start = mInline.index;
+    const end = mInline.index + mInline[0].length;
+    // Only add this inline code span if it doesn't lie inside an existing skip range
+    const insideExisting = skipRanges.some(r => start >= r.start && start < r.end);
+    if (!insideExisting) {
+      addRange(start, end);
+    }
+    // continue searching
+  }
+
+  // Utility: test whether an index is inside any skip range
+  function isInSkipRanges(pos: number) {
+    for (const r of skipRanges) {
+      if (pos >= r.start && pos < r.end) return true;
+    }
+    return false;
+  }
+
+  // Now do a guarded replacement of embeds: skip any match whose offset is inside a code range.
   const embedPattern = /!\[\[([^\]]+)\]\]/g;
 
-  return content.replace(embedPattern, (match, payload) => {
+  // We'll use replace with a callback so we get the offset parameter and can decide.
+  const result = content.replace(embedPattern, (match: string, payload: string, offsetMatch: number) => {
+    // If this embed appears inside a fenced/indented/inline code range, leave it untouched.
+    if (isInSkipRanges(offsetMatch)) {
+      return match;
+    }
+
+    // Otherwise proceed with the existing embed resolution logic (kept from your prior implementation).
     try {
       // Parse payload into fileNamePart and headerPart
-      // e.g. "file" => fileNamePart="file", headerPart=undefined
-      //      "file#Header" => fileNamePart="file", headerPart="Header"
-      //      "#Header" => fileNamePart="", headerPart="Header"  (self-embed)
       const raw = String(payload || '').trim();
       const hashIndex = raw.indexOf('#');
       let fileNamePart = raw;
@@ -698,5 +797,6 @@ export function preprocessEmbeds(
       return `> **Error embedding ${payload}**`;
     }
   });
-}
 
+  return result;
+}

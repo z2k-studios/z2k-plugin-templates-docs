@@ -1,9 +1,9 @@
 // AUTO GENERATED IN STEP 6 - DO NOT EDIT
-// Created: 2025-10-02T05:47:00.924Z
+// Created: 2025-10-02T05:58:27.855Z
 
 export const navbarMeta = {
   "source": "default",
-  "timestamp": "2025-10-02T05:47:00.924Z",
+  "timestamp": "2025-10-02T05:58:27.855Z",
   "inferredFrom": [],
   "indexSummary": {
     "folders": 1,
