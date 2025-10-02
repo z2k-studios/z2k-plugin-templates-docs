@@ -1,48 +1,19 @@
 {
   "meta": {
-    "source": "inferred",
-    "timestamp": "2025-10-01T22:52:52.286Z",
-    "inferredFrom": [
-      "{\"folder\":\"how-to-guides\",\"mappedTo\":\"How To Guides\"}",
-      "{\"folder\":\"best-practices\",\"mappedTo\":\"Best Practices\"}",
-      "{\"folder\":\"reference-manual\",\"mappedTo\":\"Reference Manual\"}",
-      "{\"folder\":\"automation\",\"mappedTo\":\"Automation\"}"
-    ],
+    "source": "default",
+    "timestamp": "2025-10-01T22:53:59.008Z",
+    "inferredFrom": [],
     "indexSummary": {
-      "folders": 21,
-      "files": 53
+      "folders": 1,
+      "files": 5
     },
-    "itemsCount": 7
+    "itemsCount": 3
   },
   "items": [
     {
       "type": "docSidebar",
       "sidebarId": "Intro",
       "label": "Intro",
-      "position": "left"
-    },
-    {
-      "type": "docSidebar",
-      "sidebarId": "How To Guides",
-      "label": "How To Guides",
-      "position": "left"
-    },
-    {
-      "type": "docSidebar",
-      "sidebarId": "Best Practices",
-      "label": "Best Practices",
-      "position": "left"
-    },
-    {
-      "type": "docSidebar",
-      "sidebarId": "Reference Manual",
-      "label": "Reference Manual",
-      "position": "left"
-    },
-    {
-      "type": "docSidebar",
-      "sidebarId": "Automation",
-      "label": "Automation",
       "position": "left"
     },
     {
@@ -61,225 +32,19 @@
     "Intro",
     "type",
     "id",
-    "label",
-    "How To Guides",
-    "items",
-    "link",
-    "Best Practices",
-    "Reference Manual",
-    "Automation"
+    "label"
   ],
   "indexSample": {
     "folders": [
       {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs",
-        "sourceName": "docs",
+        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates-docs/scripts/import-obsidian/test-jigs/test-source-files",
+        "sourceName": "test-source-files",
         "destDir": "",
-        "destSlug": "docs",
-        "destTitle": "Introduction",
+        "destSlug": "test-source-files",
+        "destTitle": "test-source-files",
         "sidebarPosition": 0,
         "finalDestFolder": "",
         "normalizedDestDir": ""
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/automation",
-        "sourceName": "automation",
-        "destDir": "automation",
-        "destSlug": "automation",
-        "destTitle": "Overview",
-        "sidebarPosition": 50,
-        "finalDestFolder": "automation",
-        "normalizedDestDir": "automation"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/best-practices",
-        "sourceName": "best-practices",
-        "destDir": "best-practices",
-        "destSlug": "best-practices",
-        "destTitle": "Overview",
-        "sidebarPosition": 20,
-        "finalDestFolder": "best-practices",
-        "normalizedDestDir": "best-practices"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/how-to-guides",
-        "sourceName": "how-to-guides",
-        "destDir": "how-to-guides",
-        "destSlug": "how-to-guides",
-        "destTitle": "Overview",
-        "sidebarPosition": 10,
-        "finalDestFolder": "how-to-guides",
-        "normalizedDestDir": "how-to-guides"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/how-to-guides/Advanced",
-        "sourceName": "Advanced",
-        "destDir": "how-to-guides/advanced",
-        "destSlug": "advanced",
-        "destTitle": "Advanced Guides",
-        "sidebarPosition": 40,
-        "finalDestFolder": "advanced",
-        "normalizedDestDir": "how-to-guides/advanced"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/how-to-guides/Beginner",
-        "sourceName": "Beginner",
-        "destDir": "how-to-guides/beginner",
-        "destSlug": "beginner",
-        "destTitle": "Beginner Guides",
-        "sidebarPosition": 20,
-        "finalDestFolder": "beginner",
-        "normalizedDestDir": "how-to-guides/beginner"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/how-to-guides/Getting Started",
-        "sourceName": "Getting Started",
-        "destDir": "how-to-guides/getting-started",
-        "destSlug": "getting-started",
-        "destTitle": "Getting Started",
-        "sidebarPosition": 10,
-        "finalDestFolder": "getting-started",
-        "normalizedDestDir": "how-to-guides/getting-started"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/how-to-guides/Intermediate",
-        "sourceName": "Intermediate",
-        "destDir": "how-to-guides/intermediate",
-        "destSlug": "intermediate",
-        "destTitle": "Intermediate Guides",
-        "sidebarPosition": 30,
-        "finalDestFolder": "intermediate",
-        "normalizedDestDir": "how-to-guides/intermediate"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/reference-manual",
-        "sourceName": "reference-manual",
-        "destDir": "reference-manual",
-        "destSlug": "reference-manual",
-        "destTitle": "Table of Contents",
-        "sidebarPosition": 30,
-        "finalDestFolder": "reference-manual",
-        "normalizedDestDir": "reference-manual"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/reference-manual/Built-In Helper Functions",
-        "sourceName": "Built-In Helper Functions",
-        "destDir": "reference-manual/built-in-helper-functions",
-        "destSlug": "built-in-helper-functions",
-        "destTitle": "Built-In Helper Functions",
-        "sidebarPosition": 90,
-        "finalDestFolder": "built-in-helper-functions",
-        "normalizedDestDir": "reference-manual/built-in-helper-functions"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/reference-manual/Built-In Template Fields",
-        "sourceName": "Built-In Template Fields",
-        "destDir": "reference-manual/built-in-template-fields",
-        "destSlug": "built-in-template-fields",
-        "destTitle": "Built-In Template Fields",
-        "sidebarPosition": 40,
-        "finalDestFolder": "built-in-template-fields",
-        "normalizedDestDir": "reference-manual/built-in-template-fields"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/reference-manual/Data Formatting",
-        "sourceName": "Data Formatting",
-        "destDir": "reference-manual/data-formatting",
-        "destSlug": "data-formatting",
-        "destTitle": "Data Formatting",
-        "sidebarPosition": 50,
-        "finalDestFolder": "data-formatting",
-        "normalizedDestDir": "reference-manual/data-formatting"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/reference-manual/Handlebars Support",
-        "sourceName": "Handlebars Support",
-        "destDir": "reference-manual/handlebars-support",
-        "destSlug": "handlebars-support",
-        "destTitle": "Handlebars Support",
-        "sidebarPosition": 70,
-        "finalDestFolder": "handlebars-support",
-        "normalizedDestDir": "reference-manual/handlebars-support"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/reference-manual/Helper Functions",
-        "sourceName": "Helper Functions",
-        "destDir": "reference-manual/helper-functions",
-        "destSlug": "helper-functions",
-        "destTitle": "Helper Functions",
-        "sidebarPosition": 80,
-        "finalDestFolder": "helper-functions",
-        "normalizedDestDir": "reference-manual/helper-functions"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/reference-manual/Partial Templates",
-        "sourceName": "Partial Templates",
-        "destDir": "reference-manual/partial-templates",
-        "destSlug": "partial-templates",
-        "destTitle": "Partial Templates",
-        "sidebarPosition": 100,
-        "finalDestFolder": "partial-templates",
-        "normalizedDestDir": "reference-manual/partial-templates"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/reference-manual/Prompting",
-        "sourceName": "Prompting",
-        "destDir": "reference-manual/prompting",
-        "destSlug": "prompting",
-        "destTitle": "Prompting",
-        "sidebarPosition": 60,
-        "finalDestFolder": "prompting",
-        "normalizedDestDir": "reference-manual/prompting"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/reference-manual/Settings Page",
-        "sourceName": "Settings Page",
-        "destDir": "reference-manual/settings-page",
-        "destSlug": "settings-page",
-        "destTitle": "Settings Page",
-        "sidebarPosition": 130,
-        "finalDestFolder": "settings-page",
-        "normalizedDestDir": "reference-manual/settings-page"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/reference-manual/Template Fields",
-        "sourceName": "Template Fields",
-        "destDir": "reference-manual/template-fields",
-        "destSlug": "template-fields",
-        "destTitle": "Template Fields",
-        "sidebarPosition": 20,
-        "finalDestFolder": "template-fields",
-        "normalizedDestDir": "reference-manual/template-fields"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/reference-manual/Template Files",
-        "sourceName": "Template Files",
-        "destDir": "reference-manual/template-files",
-        "destSlug": "template-files",
-        "destTitle": "Template Files",
-        "sidebarPosition": 10,
-        "finalDestFolder": "template-files",
-        "normalizedDestDir": "reference-manual/template-files"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/reference-manual/Template Folders",
-        "sourceName": "Template Folders",
-        "destDir": "reference-manual/template-folders",
-        "destSlug": "template-folders",
-        "destTitle": "Template Folders",
-        "sidebarPosition": 30,
-        "finalDestFolder": "template-folders",
-        "normalizedDestDir": "reference-manual/template-folders"
-      },
-      {
-        "sourcePath": "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs/reference-manual/Z2K Templates and YAML",
-        "sourceName": "Z2K Templates and YAML",
-        "destDir": "reference-manual/z2k-templates-and-yaml",
-        "destSlug": "z2k-templates-and-yaml",
-        "destTitle": "Z2K Templates and YAML",
-        "sidebarPosition": 110,
-        "finalDestFolder": "z2k-templates-and-yaml",
-        "normalizedDestDir": "reference-manual/z2k-templates-and-yaml"
       }
     ]
   }
