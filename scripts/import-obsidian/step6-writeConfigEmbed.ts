@@ -353,7 +353,8 @@ export function writeNavbarItems(
     itemsCount: items.length,
   };
 
-  const moduleContents = `// GENERATED - DO NOT EDIT
+  const moduleContents = 
+`// AUTO GENERATED IN STEP 6 - DO NOT EDIT
 // Created: ${new Date().toISOString()}
 
 export const navbarMeta = ${JSON.stringify(meta, null, 2)};
@@ -366,15 +367,7 @@ export default navbarItems;
   // --- Write outputs ---
   fs.writeFileSync(generatedFilePath, moduleContents, 'utf8');
 
-  const debugPath = path.join(path.dirname(generatedFilePath), 'navbarItems.debug.json');
-  fs.writeFileSync(
-    debugPath,
-    JSON.stringify({ meta, items, sidebarKeys, indexSample: { folders: (index.folders || []).slice(0, 60) } }, null, 2),
-    'utf8'
-  );
-
   utils.statusLog(`🧭 Navbar items written to ${generatedFilePath} (provenance=${provenance})`);
-  utils.verboseLog(`[writeNavbarItems] debug file: ${debugPath}`);
 
   // --- Best-effort validation: warn about docSidebar sidebarIds not present in sidebars.ts (only when sidebars parsed) ---
   try {
@@ -383,19 +376,19 @@ export default navbarItems;
         .filter(it => it.type === 'docSidebar' && it.sidebarId && !sidebarKeys.some(k => k === String(it.sidebarId)))
         .map(it => String(it.sidebarId));
       if (missing.length) {
-        utils.statusLog(
+        utils.warningLog(
           `[writeNavbarItems] NOTICE: generated sidebarId(s) not literal keys in sidebars.ts (these are fallbacks): ${[...new Set(missing)].join(
             ', '
           )}`
         );
       } else {
-        utils.verboseLog('[writeNavbarItems] All generated sidebarIds are exact keys present in sidebars.ts');
+        utils.warningLog('[writeNavbarItems] All generated sidebarIds are exact keys present in sidebars.ts');
       }
     } else {
-      utils.verboseLog('[writeNavbarItems] sidebars.ts not found or could not be parsed; skipping validation');
+      utils.warningLog('[writeNavbarItems] sidebars.ts not found or could not be parsed; skipping validation');
     }
   } catch (err) {
-    utils.verboseLog(`[writeNavbarItems] validation skipped (error): ${String(err)}`);
+    utils.warningLog(`[writeNavbarItems] validation skipped (error): ${String(err)}`);
   }
 
   return generatedFilePath;

@@ -22,6 +22,7 @@ while true; do
   echo "   3 - Embedded Links (File 1)"
   echo "   4 - Embedded Links (File 2)"
   echo "   5 - Callouts"
+  echo "   6 - Code Blocks"
   echo "   q - Quit"
   echo
 
@@ -52,6 +53,11 @@ while true; do
       code -r --diff \
         "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-callouts.md" \
         "./docs/callouts.md"
+      ;;
+    6)
+      code -r --diff \
+        "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-code-blocks.md" \
+        "./docs/code-blocks.md"
       ;;
     q|Q)
       echo "Exiting."
