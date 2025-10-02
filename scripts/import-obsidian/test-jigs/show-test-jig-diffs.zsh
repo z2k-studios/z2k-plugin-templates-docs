@@ -31,33 +31,33 @@ while true; do
   case "$choice" in
     1)
       code -r --diff \
-        "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-markdown-basics.md" \
-        "./docs/markdown-basics.md"
+        "./docs/markdown-basics.md" \
+        "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-markdown-basics.md" 
       ;;
     2)
       code -r --diff \
-        "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-markdown-links.md" \
-        "./docs/markdown-links.md"
+        "./docs/markdown-links.md" \
+        "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-markdown-links.md" 
       ;;
     3)
       code -r --diff \
-        "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-markdown-embedded-links-file-1.md" \
-        "./docs/markdown-embedded-links-file-1.md"
+        "./docs/markdown-embedded-links-file-1.md" \
+        "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-markdown-embedded-links-file-1.md"
       ;;
     4)
       code -r --diff \
-        "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-markdown-embedded-links-file-2.md" \
-        "./docs/markdown-embedded-links-file-2.md"
+        "./docs/markdown-embedded-links-file-2.md" \
+        "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-markdown-embedded-links-file-2.md"
       ;;
     5)
       code -r --diff \
-        "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-callouts.md" \
-        "./docs/callouts.md"
+        "./docs/callouts.md" \
+        "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-callouts.md"
       ;;
     6)
       code -r --diff \
-        "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-code-blocks.md" \
-        "./docs/code-blocks.md"
+        "./docs/code-blocks.md" \
+        "./scripts/import-obsidian/test-jigs/test-canonical-output-files/canonical-code-blocks.md"
       ;;
     q|Q)
       echo "Exiting."
@@ -67,6 +67,4 @@ while true; do
       echo "Invalid choice: ${choice}"
       ;;
   esac
-
-  read -r "enter?Press Enter to return to the menu..."
 done
