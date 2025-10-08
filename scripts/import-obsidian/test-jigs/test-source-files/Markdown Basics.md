@@ -36,6 +36,12 @@ Unordered lists:
 * item star
 + item plus
 
+Unordered lists with two spaces at the end of each line:  
+- item dash 1  
+- item dash 2  
+   - nested child (3 spaces)  
+    - nested child (4 spaces)  
+
 Ordered list:
 1. First item
 2. Second item
