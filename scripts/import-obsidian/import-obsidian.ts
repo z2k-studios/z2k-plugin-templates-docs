@@ -37,6 +37,13 @@ async function main() {
   utils.setTesting(process.argv.includes('-t'));
   if (utils.TESTING)   {   console.log('Test Jigs enabled');  } // Note: this will reset the SRC path to the test jig folder
 
+  // New: parse strip-danger alongside other flags
+  const stripDangerCallouts =
+    process.argv.includes('--strip-danger') || process.env.STRIP_DANGER_CALLOUTS === '1';
+  if (stripDangerCallouts && utils.VERBOSE) {
+    console.log('Stripping DANGER callouts');
+  }
+
   utils.initializeLogs();
 
 
@@ -80,7 +87,7 @@ async function main() {
   // --------------------------------------------------------------------------------------------------
   utils.verboseLog(`\n-----------------------------\n Step 5: Using Remark to Rewrite Markdown to MDX in: ${utils.PATH_DOCS}\n-----------------------------`);
   const summary: Summary = { filesCopied: 0, wikilinksRewritten: 0, unresolvedLinks: 0 };
-  await step5.copyAndTransformFiles(index, summary); // Copy and transform each file from the source to the Destination
+  await step5.copyAndTransformFiles(index, summary, { stripDangerCallouts }); // pass option to step 5
 
   // Step 6: Write out the docusaurus config embed file
   // --------------------------------------------------------------------------------------------------

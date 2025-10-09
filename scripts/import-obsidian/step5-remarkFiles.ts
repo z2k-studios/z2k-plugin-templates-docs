@@ -27,7 +27,11 @@ const UNRESOLVED_LOG_NAME = 'unresolvedLinks.log';
  * @param index - The file index containing metadata about each file.
  * @param summary - The summary object to track the overall progress.
  */
-export async function copyAndTransformFiles(index: Index, summary: Summary) {
+export async function copyAndTransformFiles(
+  index: Index,
+  summary: Summary,
+  opts?: { stripDangerCallouts?: boolean }
+) {
 
   // Optionally warn on basename collisions
   warnOnBasenameCollisions(index);
@@ -61,7 +65,7 @@ export async function copyAndTransformFiles(index: Index, summary: Summary) {
   // Step through each file in the index
   // --------------------------------------------------------------------------------------------------
   for (const file of index.files) {
-    await copyAndTransformAFile(file, index, summary);
+    await copyAndTransformAFile(file, index, summary, opts);
   }
 }
 
@@ -71,7 +75,12 @@ export async function copyAndTransformFiles(index: Index, summary: Summary) {
 // -----------------------------------------------------------------------------
 // Helper: process a single file
 // Note: this function is async because it uses await for the remark processing
-async function copyAndTransformAFile(file: Index['files'][number], index: Index, summary: Summary) {
+async function copyAndTransformAFile(
+  file: Index['files'][number],
+  index: Index,
+  summary: Summary,
+  opts?: { stripDangerCallouts?: boolean }
+) {
 
   // Construct the destination file path
   const destFilePath = path.join(utils.PATH_DOCS, file.destDir, file.destSlug);
@@ -134,6 +143,12 @@ async function copyAndTransformAFile(file: Index['files'][number], index: Index,
       //.use(remarkFrontmatter) // Parse YAML frontmatter - useful if we needed to set YAML properties
       //.use(remarkGfm) // GitHub Flavored Markdown - but since Obsidian is already mostly GFM compliant, this is skipped here
 
+      // Detect and optionally strip DANGER callouts, and always warn
+      .use(z2kRemarkDangerCalloutWarnStrip, {
+        currentFile: file,
+        yamlLineOffset,
+        strip: !!opts?.stripDangerCallouts
+      })
       .use(z2kRemarkWikiLinkToMD, { index, currentFile: file, summary, yamlLineOffset }) // <<-- pass yaml offset so line numbers can be adjusted
 
       // More of my own custom plugins - if commented out, then please see below for reasons
@@ -325,8 +340,48 @@ function z2kRemarkWikiLinkToMD(options: { index: Index, currentFile?: FileIndexE
       }
     });
   };
-}
+};
 
+
+// ====================================================================================================
+// New: Detect and optionally strip Obsidian DANGER callouts
+// ====================================================================================================
+function z2kRemarkDangerCalloutWarnStrip(options: { currentFile?: FileIndexEntry, yamlLineOffset?: number, strip?: boolean }) {
+  // gather plain text from a node
+  const collectText = (n: any): string => {
+    let s = '';
+    visit(n, 'text', (t: any) => { s += t.value; });
+    return s;
+  };
+
+  return (tree: any) => {
+    visit(tree, 'blockquote', (node: any, index?: number | null, parent?: any | null) => {
+      const first = node?.children?.[0];
+      if (!first) return;
+
+      const txt = collectText(first);
+      if (!/^\s*\[\s*!\s*danger\b/i.test(txt)) return;
+
+      // Build adjusted source location
+      const sourcePath = options.currentFile?.sourcePath || 'unknown';
+      const sourceName = options.currentFile?.sourceName || path.basename(sourcePath);
+      const rawLine = node?.position?.start?.line;
+      const col = node?.position?.start?.column || '?';
+      const yamlOffset = options.yamlLineOffset || 0;
+      const adjustedLine = typeof rawLine === 'number' ? rawLine + yamlOffset : '?';
+
+      // Skip internal test files (leading "_")
+      if (!sourceName.startsWith('_')) {
+        utils.warningLog(`${sourcePath}:${adjustedLine}:${col} - DANGER callout found. Remove before publishing or use --strip-danger.`);
+      }
+
+      // Optionally strip the callout block
+      if (options.strip && parent && typeof index === 'number') {
+        parent.children.splice(index, 1);
+      }
+    });
+  };
+}
 
 // ====================================================================================================
 // HELPER FUNCTIONS

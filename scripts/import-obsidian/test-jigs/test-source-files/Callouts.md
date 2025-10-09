@@ -28,8 +28,13 @@ This file demonstrates different flavors of Obsidian callouts for remark → reh
 > [!warning]
 > A warning callout with `inline code`.
 
+---
+
 > [!danger]
 > A danger callout with a [markdown link](https://example.com).
+> Note: Danger callouts are handled differently - they are notes in the doc pages for work still to be done.
+> When the import script encounters a danger block it will force a warning to appear to the user.
+> Providing a --strip-dangers command line will force the removal of the danger blocks
 
 ---
 
