@@ -1,0 +1,9 @@
+# This file is created by the import-obsidian script (and its typescript step routines - specifically step4-remarkFiles.ts).
+# It is intended to allow the user to have clickable links for VS Code into the documentation source files for unresolved links.
+# To use these as clickable links:
+#    1) open the Z2K System Workspace in VS Code
+#    2) go to the Docs folder [ cd "/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates/docs" ]
+#    3) cat this file [ clear &&cat unresolvedLinks.log ]
+#    4) Command-Click each link below to open the source file at the specified line/column.
+# ---------------------------------------------------------------------------------------------------------------------------
+#

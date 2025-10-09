@@ -1,6 +1,5 @@
 # Ignore the docs folder (synced from source)
 docs/
-unresolvedLinks.log
 
 # Node modules
 node_modules/
@@ -15,6 +14,7 @@ build/
 
 # import-obsidian script output
 sidebars.ts
+docusaurus.config.embed.ts
 
 # Dependency lockfiles (optional)
 package-lock.json
