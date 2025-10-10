@@ -1,3 +1,42 @@
+/* ==========================================================
+   Z2K tweaks
+   ========================================================== */
+/* Custom CSS modifications for Z2K Studios */
+
+/* Sidebar Styling                                            */
+/* ---------------------------------------------------------- */
+/* Create more space for the metacategories. Only affect the docs sidebar column */
+/* Only the docs sidebar */
+.theme-doc-sidebar-menu .z2k-sidebar-metacategory {
+  padding-top: 2rem; /* adjust to taste */
+  padding-left: 0.5rem; /* adjust to taste */
+  padding-bottom: 0.25rem; /* space above the line */
+  position: relative;       /* for the ::after anchor */
+}
+.theme-doc-sidebar-menu .z2k-sidebar-metacategory::after {
+  content: "";
+  display: block;
+  height: 1px;
+  background: var(--ifm-color-emphasis-300); /* adapts to theme */
+  margin-top: 0.25rem;  /* space below text before the line */
+}
+
+[data-theme="dark"] .theme-doc-sidebar-menu .z2k-sidebar-metacategory::after,
+[data-theme="dark"] .theme-doc-sidebar-menu .z2k-sidebar-metacategory > b {
+  border-color: var(--ifm-color-emphasis-200);
+  background: var(--ifm-color-emphasis-200);
+}
+
+/* Optional: don't pad the very first one as much */
+.theme-doc-sidebar-menu .z2k-sidebar-metacategory:first-child {
+  padding-top: 1rem;
+  padding-left: 0.5rem; /* adjust to taste */
+}
+/* temporary canary */
+/* body::after { content: "NOTICE -- custom.css loaded"; position: fixed; inset: auto 1rem 1rem auto; font: 100px/1 monospace; background: #000; color: #fff; padding: 2px 4px; z-index: 99999; } */
+
+
+
 
 /* ==========================================================
    Z2K "styles" system — multiple visual variants with fonts
@@ -6,6 +45,7 @@
 /* Google Fonts imports */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Georgia:wght@400;700&display=swap');
+
 
 /* ---------- GitHub Style ---------- */
 html.style-github {

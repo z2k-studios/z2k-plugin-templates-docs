@@ -13,16 +13,20 @@
   ],
   "links": [
     {
+      "id": "reference-manual/introduction/what-is-z2k-templates",
+      "label": "What is Z2K Templates?"
+    },
+    {
+      "id": "reference-manual/introduction/core-concepts",
+      "label": "Core Concepts"
+    },
+    {
       "id": "how-to-guides/getting-started/getting-started-in-two-minutes",
       "label": "Getting Started in Two Minutes"
     },
     {
       "id": "how-to-guides/getting-started/getting-started-in-ten-minutes",
       "label": "Getting Started in Ten Minutes"
-    },
-    {
-      "id": "reference-manual/built-in-template-fields/built-in-template-fields",
-      "label": "Built-In Template Fields"
     }
   ]
 }
