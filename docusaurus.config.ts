@@ -85,7 +85,10 @@ const config: Config = {
     ],
   ],
 
-  clientModules: [require.resolve('./src/client/styles-client.js')],
+  clientModules: [
+    require.resolve('./src/client/styles-client.js'), 
+    require.resolve('./src/prism-markdown-handlebars.ts')
+  ],
 
   themeConfig: {
     image: 'img/docusaurus-social-card.jpg',
@@ -132,6 +135,7 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
+      additionalLanguages: ['handlebars'], // loads Prism’s built-in Handlebars grammar
     },
   } satisfies Preset.ThemeConfig,
 };
