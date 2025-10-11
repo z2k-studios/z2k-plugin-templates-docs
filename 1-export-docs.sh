@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Capture original args so we can inspect it later if needed
+ORIGINAL_ARGS=("$@")
+
 # -----------------------------------------------------------------------------------------------
 # 1-export-docs.sh  — consumer-side wrapper for export-obsidian-to-docusaurus
 # -----------------------------------------------------------------------------------------------
@@ -22,6 +25,7 @@ set -euo pipefail
 #   --no-update    Skip the pre-run npm install step (fast path when you know nothing changed)
 #   --bootstrap    One-time install only, then exit (useful for CI caches)
 #   --help         Show help
+#   --use-test-jig This will load the export-obsidian-to-docusaurus test jig files as the source.
 #
 # Defaults for CLI args (override with flags after `--`):
 #   --src          ../z2k-plugin-templates/docs
@@ -34,6 +38,8 @@ PACKAGE_NAME="${EXPORT_OBSIDIAN_PACKAGE:-@z2k-studios/export-obsidian-to-docusau
 PACKAGE_TAG="${EXPORT_OBSIDIAN_PACKAGE_TAG:-dev}"          # dev by default
 PACKAGE_SPEC="${PACKAGE_NAME}@${PACKAGE_TAG}"              # what we install/run via npx
 LOCAL_BIN="./node_modules/.bin/export-obsidian-to-docusaurus"
+
+TEST_JIG_SRC="../../Javascript Scripts/export-obsidian-to-docusaurus/test-jigs/test-source-files"
 
 # CLI default paths (can be overridden by passing explicit args to the tool)
 SRC_DEFAULT="../z2k-plugin-templates/docs"
@@ -51,6 +57,7 @@ Behavior:
 Options:
   --no-update    Do not run npm install before executing (use when you know deps are current)
   --bootstrap    Install ${PACKAGE_SPEC} and exit (no execution)
+  --use-test-jig This will load the export-obsidian-to-docusaurus test jig files as the source.
   --help         Show this help
 
 Environment:
@@ -114,6 +121,35 @@ for a in "${final_args[@]:-}"; do
     --debug-path|--debug-path=*) has_debug=1 ;;
   esac
 done
+
+# If the original wrapper args included --use-test-jig, ensure --src is set to TEST_JIG_SRC.
+# Note: this is AI Slop but I am too tired to refactor it better right now.
+if printf '%s\n' "${ORIGINAL_ARGS[@]:-}" | grep -Fx -- '--use-test-jig' >/dev/null 2>&1; then
+  if [[ $has_src -eq 1 ]]; then
+    # Replace any existing --src or --src=... entries with the test jig value.
+    processed_args=()
+    i=0
+    while (( i < ${#final_args[@]} )); do
+      a="${final_args[$i]}"
+      if [[ "$a" == --src=* ]]; then
+        processed_args+=("--src" "$TEST_JIG_SRC")
+      elif [[ "$a" == "--src" ]]; then
+        # replace the pair (--src VALUE) with test jig
+        processed_args+=("--src" "$TEST_JIG_SRC")
+        ((i++)) # skip the original value
+      else
+        processed_args+=("$a")
+      fi
+      ((i++))
+    done
+    final_args=("${processed_args[@]}")
+  else
+    # No src provided — append the test jig source
+    final_args+=("--src" "$TEST_JIG_SRC")
+    has_src=1
+  fi
+fi
+
 [[ $has_src   -eq 1 ]] || { final_args+=("--src" "$SRC_DEFAULT"); }
 [[ $has_dest  -eq 1 ]] || { final_args+=("--dest" "$DEST_DEFAULT"); }
 [[ $has_debug -eq 1 ]] || { final_args+=("--debug-path" "$DEBUG_PATH_DEFAULT"); }
