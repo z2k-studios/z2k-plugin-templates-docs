@@ -1,7 +1,7 @@
 /**
  * Z2K: Prism injector to highlight Handlebars fields {{…}} inside:
  * - Markdown (including headers, bold, italic, etc.)
- * - YAML fenced code blocks
+ * - YAML fenced code blocks (including YAML rendered inside Markdown front-matter)
  *
  * Design goals:
  * - SSR-safe: works during Docusaurus SSG and in the browser
@@ -11,10 +11,10 @@
  * - Robust: deep-seeds nested grammar `inside`/`rest` while avoiding cycles
  *
  * Usage:
- * - Place this file at: src/prism-markdown-handlebars.ts
- * - Register in docusaurus.config.(ts|js):
- *     clientModules: [require.resolve('./src/prism-markdown-handlebars.ts')]
- * - (Optional) themeConfig.prism.additionalLanguages: ['handlebars']
+ *   1) Place this file at: src/prism-markdown-handlebars.ts
+ *   2) Register in docusaurus.config.(ts|js):
+ *        clientModules: [require.resolve('./src/prism-markdown-handlebars.ts')]
+ *   3) (Optional) themeConfig.prism.additionalLanguages: ['handlebars']
  */
 
 (() => {
@@ -40,31 +40,18 @@
   require('prismjs/components/prism-markdown');
   require('prismjs/components/prism-yaml');
 
-  // The token that recognizes {{…}} and delegates to the Handlebars grammar inside
+  const Prism = g.Prism;
+
+  // ---- Handlebars token (outer wrapper) ----
   const hbToken = {
     pattern: /{{[\s\S]*?}}/g,
-    greedy: true,                 // so the whole {{…}} region is one outer match
-    alias: 'hb-field',            // gives us a stable CSS hook
-    inside: g.Prism.languages.handlebars,
+    greedy: true,
+    // Use 'handlebars' type with alias so both theme + custom CSS can target it
+    alias: 'hb-field',
+    inside: Prism.languages.handlebars,
   };
 
-  /**
-   * Insert the handlebars token into a language before the earliest available anchor.
-   * Falls back to attaching at the language root if no anchors exist.
-   */
-  function inject(langId: string, before: string[]): void {
-    const lang = g.Prism.languages[langId];
-    if (!lang) return;
-    for (const key of before) {
-      if ((lang as any)[key] != null) {
-        g.Prism.languages.insertBefore(langId, key, { handlebars: hbToken });
-        return;
-      }
-    }
-    if (!(lang as any).handlebars) (lang as any).handlebars = hbToken;
-  }
-
-  /** Ensure a definition has an `inside` object and contains our `handlebars` token. */
+  // ---------- helpers ----------
   function ensureHbInside(def: any) {
     if (!def || typeof def !== 'object') return;
     if (!def.inside || typeof def.inside !== 'object') def.inside = {};
@@ -76,8 +63,7 @@
    * while avoiding infinite recursion on cyclic/shared objects (Prism grammars often share refs).
    */
   function deepInjectGrammar(grammar: any, seen = new WeakSet<any>()) {
-    if (!grammar || typeof grammar !== 'object') return;
-    if (seen.has(grammar)) return;
+    if (!grammar || typeof grammar !== 'object' || seen.has(grammar)) return;
     seen.add(grammar);
 
     for (const key of Object.keys(grammar)) {
@@ -97,31 +83,101 @@
     }
   }
 
-  // --- Markdown: make {{…}} trump inner tokens (headers, bold, italic, etc.) ---
-  // Insert early, then deep-seed so nested tokens like 'title', 'bold', 'italic', 'content' get it too.
-  inject('markdown', ['code', 'url', 'title', 'bold', 'italic', 'important', 'punctuation']);
-  const md = g.Prism.languages.markdown as any;
-  deepInjectGrammar(md);
+  // ---------- 1) Seed YAML first (covers embedded/front-matter YAML) ----------
+  const yaml = Prism.languages.yaml;
+  if (yaml) {
+    // Make {{…}} win before punctuation/strings/keys
+    Prism.languages.insertBefore('yaml', 'punctuation', { handlebars: hbToken });
+    // Deeply seed nested shapes
+    deepInjectGrammar(yaml);
+  }
 
-  // Bold/italic frequently wrap inner text under a 'content' sub-token; ensure it’s primed.
-  ['bold', 'italic'].forEach((k) => {
-    const def = md?.[k];
-    const defs = Array.isArray(def) ? def : def ? [def] : [];
-    for (const d of defs) {
-      ensureHbInside(d);
-      if (d.inside) {
-        d.inside.content = d.inside.content || {};
-        ensureHbInside(d.inside.content);
+  // ---------- 2) Inject into Markdown, before its 'code' rule ----------
+  const md = Prism.languages.markdown as any;
+  if (md) {
+    Prism.languages.insertBefore('markdown', 'code', { handlebars: hbToken });
+    deepInjectGrammar(md);
+
+    // Common nesting: bold/italic content buckets
+    ['bold', 'italic'].forEach((k) => {
+      const def = md[k];
+      const defs = Array.isArray(def) ? def : def ? [def] : [];
+      for (const d of defs) {
+        ensureHbInside(d);
+        if (d.inside) {
+          d.inside.content = d.inside.content || {};
+          ensureHbInside(d.inside.content);
+        }
       }
-    }
-  });
+    });
+  }
 
-  // --- YAML (inside fenced code blocks): win before punctuation and seed nested shapes ---
-  // This ensures {{…}} becomes an hb-field (not swallowed as plain punctuation),
-  // and any nested YAML token structures also see handlebars.
-  inject('yaml', ['punctuation', 'string', 'scalar', 'key']);
-  deepInjectGrammar(g.Prism.languages.yaml);
+  // ---------- 3) Final safety net: merge brace runs into one token ----------
+  if (!Prism.__z2kHbHookAdded) {
+    Prism.hooks.add('after-tokenize', (env: any) => {
+      if (!env || !Array.isArray(env.tokens)) return;
 
-  // Mark as patched so we don’t run again
-  g.Prism.__z2kMdHbPatched = true;
+      const Token = Prism.Token;
+
+      function isPunct(token: any, ch: string) {
+        return token && typeof token === 'object' && token.type === 'punctuation' && token.content === ch;
+      }
+
+      function wrap(tokens: any[]) {
+        for (let i = 0; i < tokens.length; i++) {
+          const t = tokens[i];
+
+          // Recurse into children/nested languages first (front-matter arrays, etc.)
+          if (Array.isArray(t)) { wrap(t); continue; }
+          if (t && typeof t === 'object' && Array.isArray(t.content)) { wrap(t.content); }
+
+          // Opening: either '{{' as one token or two '{'
+          const isOpenSingle = t && typeof t === 'object' && t.type === 'punctuation' && t.content === '{{';
+          const isOpenPair   = isPunct(t, '{') && isPunct(tokens[i + 1], '{');
+          if (!isOpenSingle && !isOpenPair) continue;
+
+          const openLen = isOpenSingle ? 1 : 2;
+
+          // Find closing: '}}' as one token or two '}'
+          let j = i + openLen;
+          let end = -1;
+          let closeIsPair = false;
+          for (; j < tokens.length; j++) {
+            const tj = tokens[j];
+            const isCloseSingle = tj && typeof tj === 'object' && tj.type === 'punctuation' && tj.content === '}}';
+            const isClosePair   = isPunct(tj, '}') && isPunct(tokens[j + 1], '}');
+            if (isCloseSingle) { end = j; break; }
+            if (isClosePair)   { end = j + 1; closeIsPair = true; break; }
+
+            // Keep descending in case nested arrays appear mid-sequence
+            if (Array.isArray(tj)) wrap(tj);
+            else if (tj && typeof tj === 'object' && Array.isArray(tj.content)) wrap(tj.content);
+          }
+          if (end === -1) continue;
+
+          const openTokens  = tokens.slice(i, i + openLen);
+          const innerStart  = i + openLen;
+          const innerEnd    = closeIsPair ? (end - 1) : end;
+          const inner       = tokens.slice(innerStart, innerEnd);
+          const closeTokens = tokens.slice(innerEnd, end + 1);
+
+          // Real Prism.Token; type 'handlebars' with alias 'hb-field' (plus 'handlebars' for theme)
+          const hbWrapper = new Token(
+            'handlebars',
+            [...openTokens, ...inner, ...closeTokens],
+            ['hb-field', 'handlebars']
+          );
+
+          tokens.splice(i, end - i + 1, hbWrapper);
+          i++; // advance past the wrapper
+        }
+      }
+
+      wrap(env.tokens);
+    });
+
+    Prism.__z2kHbHookAdded = true;
+  }
+
+  Prism.__z2kMdHbPatched = true;
 })();

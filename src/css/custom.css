@@ -40,37 +40,57 @@
   padding-left: 0.5rem; /* adjust to taste */
 }
 
-/* Code Block Handlebars Styling                              */
-/* ---------------------------------------------------------- */
-/* Handlebars fields background inside fenced code blocks */
-/* Background pill for entire {{ … }} region */
+/* ==========================================================
+   Code Block Handlebars Styling
+   ========================================================== */
 
-/* src/css/custom.css */
+/* Ensure .token.handlebars.hb-field behaves like a single inline fragment */
+.token.handlebars.hb-field { box-decoration-break: clone; }
 
-/* Pill: subtle bg behind all parts of a {{…}} field */
+   /* Pill: subtle bg behind all parts of a {{…}} field */
 .token.hb-field {
   background: var(--z2k-hb-bg, #e2e3e5);
-  display: inline;                       /* middle tokens won’t add their own side padding */
+  display: inline-block;                       /* middle tokens won’t add their own side padding */
   border-radius: 6px;
   line-height: 1.35;
   box-decoration-break: clone;
   margin-top: 2px;                       /* prevents stacked lines from fusing */
   margin-bottom: 2px;
-  padding-block: 0.12em;                 /* ↑ adds a touch of height without bleeding (#4 tweak) */
+  padding-block: 0.12em;                 /* adds height without bleeding into next line */
   word-spacing: 0;                        /* guard against theme spacing */
+
+  /* thin outline */
+  border: 1px solid var(--z2k-hb-border, rgba(0,0,0,0.08));
+  /* keep the border inside the pill shape */
+  box-sizing: border-box;
 }
 
 /* Run edges add horizontal padding; middles stay tight */
-.token.hb-field:not(.hb-field + .hb-field) { padding-left: 0.22em; }
-.token.hb-field:not(:has(+ .hb-field))    { padding-right: 0.22em; }
-.token.hb-field + .token.hb-field {
-  margin-left: -0.06em;
-  padding-left: 0;
+/* First in Run: */
+.token.hb-field:not(.hb-field + .hb-field) { 
+  padding-left: 0.22em; 
+}  
+
+/* Last in Run: */
+.token.hb-field:not(:has(+ .hb-field))    { 
+  padding-right: 0.22em; 
+} 
+
+/* If a token directly follows another hb-field, drop its left border (prevent double seam) */
+.token.hb-field + .token.hb-field {                                   /* middle/last (not first) */
+  margin-left: -0.06em;                                               /* closes inner seam */
+  padding-left: 0;                                                    /* no inner left padding */
+  border-left: none;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+  border-top-left-radius: 0;  /* existing radius adjustments */
+  border-bottom-left-radius: 0;
 }
-.token.hb-field:has(+ .hb-field) {
-  padding-right: 0;
+
+/* If a token has a following hb-field, drop its right border (prevents double seam) */
+.token.hb-field:has(+ .hb-field) {                                     /* middle/first (not last) */
+  padding-right: 0;                                                    /* no inner right padding */
+  border-right: none;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -78,54 +98,55 @@
 /* Dark theme variant */
 html[data-theme='dark'] .token.hb-field {
   background: var(--z2k-hb-bg-dark, #2f3337);
+  border-color: var(--z2k-hb-border-dark, rgba(255,255,255,0.06));
 }
 
-/* Run edges: only outermost tokens add horizontal padding; middles don’t */
-.token.hb-field:not(.hb-field + .hb-field) {        /* first in run */
-  padding-left: 0.22em;
-}
-.token.hb-field:not(:has(+ .hb-field)) {            /* last in run */
-  padding-right: 0.22em;
-}
-.token.hb-field + .token.hb-field {                 /* middle or last (not first) */
-  margin-left: -0.06em;                             /* closes inner seam */
-  padding-left: 0;                                  /* no inner left padding */
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-.token.hb-field:has(+ .token.hb-field) {            /* middle or first (not last) */
-  padding-right: 0;                                 /* no inner right padding */
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-/* Delimiters darker (#1) */
+/* Delimiters darker */
 .token.hb-field.delimiter,
 .token.hb-field.punctuation { color: var(--z2k-hb-delim, #2f302c); }
 html[data-theme='dark'] .token.hb-field.delimiter,
 html[data-theme='dark'] .token.hb-field.punctuation { color: var(--z2k-hb-delim-dark, #e0e2e4); }
 
-/* Variables color (#5) */
-.token.hb-field.variable { color: var(--z2k-hb-var, #12807e); }
+/* Add small internal spacing inside the opening/closing delimiters.
+   Opening delimiter (e.g. "{{") is usually followed by a field token -> add right padding.
+   Closing delimiter (e.g. "}}") is usually NOT followed by a field token -> add left padding. */
+.token.hb-field.delimiter:has(+ .token.hb-field) {
+  padding-right: 0.22em;
+}
+.token.hb-field.delimiter:not(:has(+ .token.hb-field)) {
+  padding-left: 0.22em;
+}
+
+/* Mirror for dark theme (keeps spacing consistent across themes) */
+html[data-theme='dark'] .token.hb-field.delimiter:has(+ .token.hb-field) {
+  padding-right: 0.22em;
+}
+html[data-theme='dark'] .token.hb-field.delimiter:not(:has(+ .token.hb-field)) {
+  padding-left: 0.22em;
+}
+
+
+/* Variables color - had to include !important to override Prism's default */
+.token.handlebars.hb-field.variable, .token.hb-field.variable { color: var(--z2k-hb-var, var(--ifm-color-success-darkest, #007300)) !important; }
 html[data-theme='dark'] .token.hb-field.variable { color: var(--z2k-hb-var-dark, #7fd8d5); }
 
-/* Optional knobs */
-/* z2k-hb-bg: background of entire field pill
+/* Optional knobs
+   z2k-hb-bg: background of entire field pill
    z2k-hb-delim: color of delimiters {{ and }} and punctuation (|, ., etc)
    z2k-hb-var: color of variables inside the field
    These can be adjusted here or overridden in site-specific CSS */
 :root {
   --z2k-hb-bg: #e2e3e5;          /* slightly darker than default */
   --z2k-hb-delim: #2f302c;
-  --z2k-hb-var: #12807e;
+  --z2k-hb-var: var(--ifm-color-success-darkest, #007300);
+  --z2k-hb-border: rgba(0,0,0,0.08);         /* light theme pill border */
 }
 html[data-theme='dark'] {
   --z2k-hb-bg-dark: #2f3337;
   --z2k-hb-delim-dark: #e0e2e4;
   --z2k-hb-var-dark: #7fd8d5;
+  --z2k-hb-border-dark: rgba(255,255,255,0.08); /* dark theme pill border */
 }
-
-
 
 /* ==========================================================
    Z2K "styles" system — multiple visual variants with fonts
