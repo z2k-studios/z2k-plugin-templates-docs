@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkz2k_plugin_templates_docs=globalThis.webpackChunkz2k_plugin_templates_docs||[]).push([[4148],{9756:l=>{l.exports=JSON.parse('{"tags":[{"label":"Hello","permalink":"/z2k-plugin-templates-docs/blog/tags/hello","description":"Hello tag description","count":1}]}')}}]);

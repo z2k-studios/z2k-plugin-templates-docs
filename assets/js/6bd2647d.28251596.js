@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkz2k_plugin_templates_docs=self.webpackChunkz2k_plugin_templates_docs||[]).push([[9106],{2811:e=>{e.exports=JSON.parse('{"metadata":{"permalink":"/z2k-plugin-templates-docs/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":1,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);
