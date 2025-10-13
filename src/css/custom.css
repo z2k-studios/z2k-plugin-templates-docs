@@ -41,75 +41,108 @@
 }
 
 /* ==========================================================
-   Code Block Handlebars Styling
+   Code Block Handlebars Styling (unified variables; no visual change)
    ========================================================== */
+
+/* Make the comment fields not be italicized */
+.token.handlebars.hb-field.comment { font-style: normal; }
 
 /* Ensure .token.handlebars.hb-field behaves like a single inline fragment */
 .token.handlebars.hb-field { box-decoration-break: clone; }
 
-   /* Pill: subtle bg behind all parts of a {{…}} field */
+/* ----------------------------------------------------------
+   Theme tokens
+   - Single semantic variable per concept.
+   - Light values in :root; dark overrides under [data-theme='dark'].
+   - Component rules below reference only these tokens.
+   ---------------------------------------------------------- */
+/* ----------------------------------------------------------
+   Knobs: 
+   - z2k-hb-pill-bg: background of entire field pill
+   - z2k-hb-pill-border: color of pill border
+   - z2k-hb-delim: color of delimiters {{ and }} and punctuation (|, ., etc)
+   - z2k-hb-var: color of variables inside the field
+   These can be adjusted in :root and overridden in the dark theme block.
+   ---------------------------------------------------------- */
+
+:root {
+  --z2k-hb-pill-bg:     #e4e5e7;                 /* light: pill background */
+  --z2k-hb-pill-border: rgba(0,0,0,0.08);        /* light: pill border */
+  --z2k-hb-delim:       #2f302c;                 /* light: delimiters {{ }}, punctuation */
+  --z2k-hb-var:         var(--ifm-color-success-darkest, #007300); /* light: variables */
+}
+
+html[data-theme='dark'] {
+  --z2k-hb-pill-bg:     #2f3337;                 /* dark: pill background (matches prior) */
+  --z2k-hb-pill-border: rgba(255,255,255,0.08);  /* dark: pill border (matches prior) */
+  --z2k-hb-delim:       #e0e2e4;                 /* dark: delimiters */
+  --z2k-hb-var:         #7fd8d5;                 /* dark: variables */
+}
+
+/* ----------------------------------------------------------
+   Pill: subtle bg behind all parts of a {{…}} field
+   ---------------------------------------------------------- */
 .token.hb-field {
-  background: var(--z2k-hb-bg, #e2e3e5);
+  background: var(--z2k-hb-pill-bg);
   display: inline-block;                       /* middle tokens won’t add their own side padding */
   border-radius: 6px;
   line-height: 1.35;
   box-decoration-break: clone;
-  margin-top: 2px;                       /* prevents stacked lines from fusing */
+  margin-top: 2px;                             /* prevents stacked lines from fusing */
   margin-bottom: 2px;
-  padding-block: 0.12em;                 /* adds height without bleeding into next line */
-  word-spacing: 0;                        /* guard against theme spacing */
+  padding-block: 0.12em;                       /* adds height without bleeding into next line */
+  word-spacing: 0;                             /* guard against theme spacing */
 
   /* thin outline */
-  border: 1px solid var(--z2k-hb-border, rgba(0,0,0,0.08));
+  border: 1px solid var(--z2k-hb-pill-border);
   /* keep the border inside the pill shape */
   box-sizing: border-box;
 }
 
-/* Run edges add horizontal padding; middles stay tight */
+/* ----------------------------------------------------------
+   Pill: Run edges add horizontal padding; middles stay tight
+   ---------------------------------------------------------- */
+
 /* First in Run: */
-.token.hb-field:not(.hb-field + .hb-field) { 
-  padding-left: 0.22em; 
-}  
+.token.hb-field:not(.hb-field + .hb-field) {
+  padding-left: 0.22em;
+}
 
 /* Last in Run: */
-.token.hb-field:not(:has(+ .hb-field))    { 
-  padding-right: 0.22em; 
-} 
+.token.hb-field:not(:has(+ .hb-field)) {
+  padding-right: 0.22em;
+}
 
 /* If a token directly follows another hb-field, drop its left border (prevent double seam) */
-.token.hb-field + .token.hb-field {                                   /* middle/last (not first) */
-  margin-left: -0.06em;                                               /* closes inner seam */
-  padding-left: 0;                                                    /* no inner left padding */
+.token.hb-field + .token.hb-field {             /* middle/last (not first) */
+  margin-left: -0.06em;                         /* closes inner seam */
+  padding-left: 0;                              /* no inner left padding */
   border-left: none;
   border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;  /* existing radius adjustments */
   border-bottom-left-radius: 0;
 }
 
 /* If a token has a following hb-field, drop its right border (prevents double seam) */
-.token.hb-field:has(+ .hb-field) {                                     /* middle/first (not last) */
-  padding-right: 0;                                                    /* no inner right padding */
+.token.hb-field:has(+ .hb-field) {              /* middle/first (not last) */
+  padding-right: 0;                             /* no inner right padding */
   border-right: none;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-/* Dark theme variant */
-html[data-theme='dark'] .token.hb-field {
-  background: var(--z2k-hb-bg-dark, #2f3337);
-  border-color: var(--z2k-hb-border-dark, rgba(255,255,255,0.06));
-}
-
-/* Delimiters darker */
+/* ----------------------------------------------------------
+   Delimiters & punctuation coloring (uses tokens)
+   ---------------------------------------------------------- */
 .token.hb-field.delimiter,
-.token.hb-field.punctuation { color: var(--z2k-hb-delim, #2f302c); }
+.token.hb-field.punctuation { color: var(--z2k-hb-delim); }
 html[data-theme='dark'] .token.hb-field.delimiter,
-html[data-theme='dark'] .token.hb-field.punctuation { color: var(--z2k-hb-delim-dark, #e0e2e4); }
+html[data-theme='dark'] .token.hb-field.punctuation { color: var(--z2k-hb-delim); } /* explicit mirror; redundant but harmless */
 
-/* Add small internal spacing inside the opening/closing delimiters.
+/* ----------------------------------------------------------
+   Delimiter internal spacing
    Opening delimiter (e.g. "{{") is usually followed by a field token -> add right padding.
-   Closing delimiter (e.g. "}}") is usually NOT followed by a field token -> add left padding. */
+   Closing delimiter (e.g. "}}") is usually NOT followed by a field token -> add left padding.
+   ---------------------------------------------------------- */
 .token.hb-field.delimiter:has(+ .token.hb-field) {
   padding-right: 0.22em;
 }
@@ -125,28 +158,12 @@ html[data-theme='dark'] .token.hb-field.delimiter:not(:has(+ .token.hb-field)) {
   padding-left: 0.22em;
 }
 
+/* ----------------------------------------------------------
+   Variables color (override Prism’s default)
+   ---------------------------------------------------------- */
+.token.handlebars.hb-field.variable,
+.token.hb-field.variable { color: var(--z2k-hb-var) !important; }
 
-/* Variables color - had to include !important to override Prism's default */
-.token.handlebars.hb-field.variable, .token.hb-field.variable { color: var(--z2k-hb-var, var(--ifm-color-success-darkest, #007300)) !important; }
-html[data-theme='dark'] .token.hb-field.variable { color: var(--z2k-hb-var-dark, #7fd8d5); }
-
-/* Optional knobs
-   z2k-hb-bg: background of entire field pill
-   z2k-hb-delim: color of delimiters {{ and }} and punctuation (|, ., etc)
-   z2k-hb-var: color of variables inside the field
-   These can be adjusted here or overridden in site-specific CSS */
-:root {
-  --z2k-hb-bg: #e2e3e5;          /* slightly darker than default */
-  --z2k-hb-delim: #2f302c;
-  --z2k-hb-var: var(--ifm-color-success-darkest, #007300);
-  --z2k-hb-border: rgba(0,0,0,0.08);         /* light theme pill border */
-}
-html[data-theme='dark'] {
-  --z2k-hb-bg-dark: #2f3337;
-  --z2k-hb-delim-dark: #e0e2e4;
-  --z2k-hb-var-dark: #7fd8d5;
-  --z2k-hb-border-dark: rgba(255,255,255,0.08); /* dark theme pill border */
-}
 
 /* ==========================================================
    Z2K "styles" system — multiple visual variants with fonts
