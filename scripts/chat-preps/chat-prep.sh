@@ -47,6 +47,7 @@ fi
 # ====== ASK USER WHICH DOCUMENT TO WORK ON ======
 echo
 echo "This script will prepare files and prompt text for a new documentation chat."
+echo "Note: It is best run in a dedicated terminal window, but is still fine in VS Code."
 echo
 echo "Choose the type of documentation you want to work on:"
 echo "  1) Reference Manual"
