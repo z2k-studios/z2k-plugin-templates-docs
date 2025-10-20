@@ -170,29 +170,63 @@ html[data-theme='dark'] .token.hb-field.delimiter:not(:has(+ .token.hb-field)) {
    Insert a special "internal link" icon after sidebar links
    ========================================================== */
 
-/* Attach icon after the link label for any item carrying your hook class */
-.z2k-sidebar-placeholder-ref > a.menu__link::after {
+/* ==========================================================
+   Z2K: Sidebar placeholder HTML entries → trailing icon
+   Uses Docusaurus' built-in external-link glyph for now
+   (via the --ifm-link-external-icon data-URL mask).
+   This mirrors how Docusaurus renders external link icons,
+   without altering default visuals elsewhere.
+   ========================================================== */
+/* Z2K: add trailing external-link-style icon to special HTML sidebar items */
+.theme-doc-sidebar-menu li.z2k-sidebar-placeholder-refhtml > a.menu__link.sidebar-refhtml::after {
+  /* Default works with the original Docusaurus external link icon */
+  /*
   content: "";
   display: inline-block;
-  width: 0.9em;            /* tune to your sidebar scale */
+  width: 0.9em;
   height: 0.9em;
   margin-left: 0.35em;
-  vertical-align: text-bottom;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  opacity: 0.95;           /* optional: subtle softening */
-  /* --- Icon #1: arrow stays inside the box (unencoded UTF-8) --- */
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 10v10h10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12l6-6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 6h4v4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-  /* --- Icon #2: arrow to target dot (unencoded UTF-8) --- */
-  /* background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 10v10h10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><path d="M14 6h4v4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12l6-6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>'); */
+  vertical-align: -0.12em;
+  */
+
+  content: "";
+  display: inline-block;
+  width: 1em;          /* small bump so the enclosed arrow reads clearly */
+  height: 1em;
+  margin-left: 0.35em;
+  vertical-align: -0.12em;
+
+  /* Tint via text color */
+  background-color: currentColor;
+
+  /* Inline SVG as a mask (black path → visible) */
+  /* Using same icon as Docusaurus for consistency */
+  /* -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">path fill="black" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></svg>'); */
+  /* mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></svg>'); */ 
+
+  /* Custom SVG: box with right-pointing arrow inside */
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" fill-rule="evenodd" d="M3 4h18v16H3V4zm2 2v12h14V6H5z"/><rect x="8" y="11" width="6" height="2" fill="black"/><polygon points="14,9 18,12 14,15" fill="black"/></svg>');
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" fill-rule="evenodd" d="M3 4h18v16H3V4zm2 2v12h14V6H5z"/><rect x="8" y="11" width="6" height="2" fill="black"/><polygon points="14,9 18,12 14,15" fill="black"/></svg>');
+
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
+
+/* Optional: hover nudge to match Docusaurus feel */
+.theme-doc-sidebar-menu li.z2k-sidebar-placeholder-refhtml > a.menu__link:hover::after {
+  transform: translateY(-0.5px);
+}
+
 
 /* Optional: if your dark theme’s link color is faint, lift the opacity */
-html[data-theme='dark'] .z2k-sidebar-placeholder-ref > a.menu__link::after {
+/* html[data-theme='dark'] .z2k-sidebar-placeholder-refhtml > a.menu__link::after {
   opacity: 1;
 }
-
+*/
 
 /* ==========================================================
    Make H2 Headings Slightly More Compact
@@ -252,13 +286,6 @@ html[data-theme='dark'] .z2k-sidebar-placeholder-ref > a.menu__link::after {
   margin-left: 10px;         /* default is larger; this feels “Notion tight” */
 }
 
-/* Chevron carets: smaller & more discreet */
-.theme-doc-sidebar-menu .menu__caret {
-  transform: scale(0.85);
-  margin-right: 6px;         /* pull text left a bit */
-  opacity: 0.7;
-}
-.theme-doc-sidebar-menu .menu__caret:hover { opacity: 1; }
 
 /* Reduce vertical gaps between list items/categories */
 .theme-doc-sidebar-menu .menu__list-item {
@@ -278,6 +305,40 @@ html[data-theme='dark'] .z2k-sidebar-placeholder-ref > a.menu__link::after {
   padding: 6px 10px;
 }
 
+
+/* ==========================================================
+   Soften and Shrink Sidebar Carets
+   ========================================================== */
+   
+/* Chevron carets: smaller & more discreet */
+/* 1) Button caret variant */
+.theme-doc-sidebar-menu .menu__caret {
+  transform: scale(0.85);
+  margin-right: 6px;
+  opacity: 0.7;
+  transition: opacity .15s ease;
+}
+.theme-doc-sidebar-menu .menu__caret:hover { opacity: 1; }
+
+/* 2) Link pseudo-caret variant */
+.theme-doc-sidebar-menu .menu__link--sublist-caret::after {
+  /* ensure the pseudo-element has box to scale */
+  width: 1rem;
+  height: 1rem;
+  background-size: 1rem 1rem;        /* shrink icon consistently */
+  opacity: 0.7;
+  transform: scale(0.85) rotate(0deg);
+  transform-origin: center;
+  margin-left: 6px;                   /* mirrors the button’s margin-right */
+  transition: opacity .15s ease, transform .15s ease;
+  /* Docusaurus already sets content/background-image; no need to redefine */
+}
+.theme-doc-sidebar-menu .menu__link--sublist-caret:hover::after { opacity: 1; }
+
+/* keep rotation behavior when expanded */
+.theme-doc-sidebar-menu .menu__link--sublist-caret[aria-expanded="true"]::after {
+  transform: scale(0.85) rotate(90deg);
+}
 
 
 /* ==========================================================
@@ -342,3 +403,18 @@ html[data-theme='dark'] {
   border-radius: var(--z2k-hl-radius);
   box-decoration-break: clone;      /* keep padding across wrapped lines */
 }
+
+
+/* ==========================================================
+   Support the REF_HTML sidebar link type
+   ========================================================== */
+
+/* If Docusaurus ever tries to set an active class/aria on the anchor, neutralize it */
+.menu__link.sidebar-refhtml[aria-current],
+.menu__link.sidebar-refhtml.menu__link--active {
+  background: transparent;
+  color: inherit;
+  font-weight: normal;
+  text-decoration: none;
+}
+

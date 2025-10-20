@@ -45,6 +45,12 @@ TEST_JIG_SRC="../../Javascript Scripts/export-obsidian-to-docusaurus/test-jigs/t
 SRC_DEFAULT="../z2k-plugin-templates/docs"
 DEST_DEFAULT="./"
 DEBUG_PATH_DEFAULT="./debug"
+BASE_URL_DEFAULT="/z2k-plugin-templates-docs/"
+ROUTE_BASE_DEFAULT="docs"
+
+# Always declare arrays up-front (prevents unbound with set -u)
+declare -a final_args
+declare -a processed_args
 
 show_help() {
   cat <<EOF
@@ -55,6 +61,8 @@ Behavior:
     then executes the local binary with sensible defaults for --src/--dest/--debug-path.
 
 Options:
+  --base-url     Override Docusaurus baseUrl for refhtml links (e.g. /z2k-plugin-templates-docs/)
+  --route-base   Override docs routeBasePath for refhtml links (default: docs)
   --no-update    Do not run npm install before executing (use when you know deps are current)
   --bootstrap    Install ${PACKAGE_SPEC} and exit (no execution)
   --use-test-jig This will load the export-obsidian-to-docusaurus test jig files as the source.
@@ -68,9 +76,12 @@ Default CLI args (can be overridden after --):
   --src          ${SRC_DEFAULT}
   --dest         ${DEST_DEFAULT}
   --debug-path   ${DEBUG_PATH_DEFAULT}
+  --base-url     ${BASE_URL_DEFAULT}
+  --route-base   ${ROUTE_BASE_DEFAULT}
 
 Examples:
   $0 -- --src ../notes --dest ./site
+  $0 -- --base-url /z2k-plugin-templates-docs/ --route-base docs  
   EXPORT_OBSIDIAN_PACKAGE_TAG=latest $0 -- --dest ./docs
   EXPORT_OBSIDIAN_PACKAGE_TAG=1.2.3   $0 -- --debug-path ./tmp/debug
 EOF
@@ -114,13 +125,43 @@ final_args=()
 for a in "${@:-}"; do final_args+=("$a"); done
 
 has_src=0; has_dest=0; has_debug=0
-for a in "${final_args[@]:-}"; do
+has_base=0; has_route=0
+BASE_URL_ARG=""; ROUTE_BASE_ARG=""
+processed_args=()
+i=0
+while (( i < ${#final_args[@]} )); do
+  a="${final_args[$i]}"
   case "$a" in
     --src|--src=*) has_src=1 ;;
     --dest|--dest=*) has_dest=1 ;;
     --debug-path|--debug-path=*) has_debug=1 ;;
+    --base-url)
+      has_base=1
+      (( i++ ))
+      BASE_URL_ARG="${final_args[$i]:-}"
+      a=""  # consume this flag/value pair
+      ;;
+    --base-url=*)
+      has_base=1
+      BASE_URL_ARG="${a#*=}"
+      a=""
+      ;;
+    --route-base)
+      has_route=1
+      (( i++ ))
+      ROUTE_BASE_ARG="${final_args[$i]:-}"
+      a=""
+      ;;
+    --route-base=*)
+      has_route=1
+      ROUTE_BASE_ARG="${a#*=}"
+      a=""
+      ;;
   esac
+  if [[ -n "$a" ]]; then processed_args+=("$a"); fi
+  ((i++))
 done
+final_args=("${processed_args[@]:-}")
 
 # If the original wrapper args included --use-test-jig, ensure --src is set to TEST_JIG_SRC.
 # Note: this is AI Slop but I am too tired to refactor it better right now.
@@ -142,7 +183,7 @@ if printf '%s\n' "${ORIGINAL_ARGS[@]:-}" | grep -Fx -- '--use-test-jig' >/dev/nu
       fi
       ((i++))
     done
-    final_args=("${processed_args[@]}")
+    final_args=("${processed_args[@]:-}")
   else
     # No src provided — append the test jig source
     final_args+=("--src" "$TEST_JIG_SRC")
@@ -153,6 +194,8 @@ fi
 [[ $has_src   -eq 1 ]] || { final_args+=("--src" "$SRC_DEFAULT"); }
 [[ $has_dest  -eq 1 ]] || { final_args+=("--dest" "$DEST_DEFAULT"); }
 [[ $has_debug -eq 1 ]] || { final_args+=("--debug-path" "$DEBUG_PATH_DEFAULT"); }
+[[ $has_base  -eq 1 ]] || { final_args+=("--base-url" "$BASE_URL_DEFAULT"); }
+[[ $has_route -eq 1 ]] || { final_args+=("--route-base" "$ROUTE_BASE_DEFAULT"); }
 
 # -------- Execute: prefer local binary; fallback to PATH; then npx @dev --------
 if [[ -x "$LOCAL_BIN" ]]; then
