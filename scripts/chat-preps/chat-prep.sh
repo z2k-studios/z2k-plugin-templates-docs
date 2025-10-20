@@ -68,7 +68,6 @@ esac
 # ====== Ask which file to work on ======
 echo
 echo "You chose to work on the $DOC_TYPE."
-
 # Find lines that contain a [[link]] in the TOC file
 toc_lines=()
 while IFS= read -r line; do
@@ -101,6 +100,12 @@ else
 		fi
 		echo "Invalid choice. Try again."
 	done
+
+	# Normalize the selected line's first [[...]] link by stripping any '|' or '#' and everything after it.
+	# e.g. - [[Name of File To Link To|What to display]]  ->  - [[Name of File To Link To]]
+	# This edits the selected toc_lines entry in-place so the later extraction will yield a cleaned link.
+	toc_lines[$sel]=$(echo "${toc_lines[$sel]}" | sed -E 's/\[\[([^|\]#]+)[|#][^]]*\]\]/[[\1]]/g')
+fi
 
 	# Extract the selected line (zsh arrays are 1-based)
 	selected_line="${toc_lines[$sel]}"
