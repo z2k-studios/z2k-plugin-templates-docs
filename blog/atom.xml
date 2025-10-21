@@ -16,8 +16,8 @@
         <content type="html"><![CDATA[<p>Greetings! It's official - the Z2K Templates Obsidian Plugin has been officially released!
 Here are a few tips you might find useful.</p>
 <ul>
-<li>Check out <a href="https://z2k-studios.github.io/z2k-plugin-templates-docs/blog/z2K-templates-plugin-in-a-nutshell.md">Z2K Templates Plugin in a Nutshell</a> to get a very quick overview of the Plugin</li>
-<li>To get up and running in under 2 minutes, check out the <a href="https://z2k-studios.github.io/z2k-plugin-templates-docs/blog/how-to-guides/Beginner/how-to-get-started-in-under-2-minutes">How to Get Started in Under 2 Minutes</a> how-to guide.</li>
+<li class="">Check out <a class="" href="https://z2k-studios.github.io/z2k-plugin-templates-docs/blog/z2K-templates-plugin-in-a-nutshell.md">Z2K Templates Plugin in a Nutshell</a> to get a very quick overview of the Plugin</li>
+<li class="">To get up and running in under 2 minutes, check out the <a class="" href="https://z2k-studios.github.io/z2k-plugin-templates-docs/blog/how-to-guides/Beginner/how-to-get-started-in-under-2-minutes">How to Get Started in Under 2 Minutes</a> how-to guide.</li>
 </ul>]]></content>
         <author>
             <name>Z2K Studios</name>
