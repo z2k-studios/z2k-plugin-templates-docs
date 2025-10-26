@@ -221,12 +221,30 @@ html[data-theme='dark'] .token.hb-field.delimiter:not(:has(+ .token.hb-field)) {
   transform: translateY(-0.5px);
 }
 
-
 /* Optional: if your dark theme’s link color is faint, lift the opacity */
 /* html[data-theme='dark'] .z2k-sidebar-placeholder-refhtml > a.menu__link::after {
   opacity: 1;
 }
 */
+
+.theme-doc-sidebar-menu li.z2k-sidebar-placeholder-refheader > a.menu__link.sidebar-refheader::after {
+  content: "";
+  display: inline-block;
+  width: 1em;          /* small bump so the enclosed arrow reads clearly */
+  height: 1em;
+  margin-left: 0.35em;
+  vertical-align: -0.12em;
+
+  /* Tint via text color */
+  background-color: currentColor;
+
+}
+
+/* Optional: hover nudge to match Docusaurus feel */
+.theme-doc-sidebar-menu li.z2k-sidebar-placeholder-refheader > a.menu__link:hover::after {
+  transform: translateY(-0.5px);
+}
+
 
 /* ==========================================================
    Make H2 Headings Slightly More Compact
@@ -418,3 +436,42 @@ html[data-theme='dark'] {
   text-decoration: none;
 }
 
+
+
+/* ==========================================================
+   Overall Docs Sidebar Layout Tweaks :: MORE WHITESPACE!
+   - narrower sidebar
+   - more breathing room between sidebar and content
+   - minimum content width
+   ========================================================== */
+
+/* 1) Make the left docs sidebar narrower (fixed width, independent of longest item) */
+:root {
+  /* Docusaurus default is ~300px. Try 240–260px; adjust to taste. */
+  --doc-sidebar-width: 240px;
+  --doc-sidebar-hidden-width: 32px; /* width when collapsed (optional) */
+}
+
+/* Allow long item text to wrap instead of forcing the column wider */
+.theme-doc-sidebar-menu .menu__link { white-space: normal; }
+
+/* 2) Add breathing room between the sidebar and the document content */
+@media (min-width: 997px) {
+  /* Add a subtle divider + padding on the sidebar’s right edge */
+  .theme-doc-sidebar-container {
+    padding-right: 0.75rem;
+    border-right: 1px solid var(--ifm-color-emphasis-200);
+  }
+
+  /* Keep the sidebar column fixed; let content take the rest */
+  .row > [class*="docSidebarContainer"] {
+    flex: 0 0 var(--doc-sidebar-width);
+    max-width: var(--doc-sidebar-width);
+  }
+
+  /* 3) Ensure the main document column never gets too skinny */
+  .row > [class*="docItemCol"] {
+    min-width: 760px;        /* pick your minimum (e.g., 680–820px) */
+    flex: 1 1 auto;          /* content grows/shrinks as space allows */
+  }
+}
