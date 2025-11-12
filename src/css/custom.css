@@ -422,6 +422,18 @@ html[data-theme='dark'] {
   box-decoration-break: clone;      /* keep padding across wrapped lines */
 }
 
+/* ==========================================================
+   keywords in the sidebar Text Styling
+   - applies .z2k-code
+   - mimics <code> (i.e. fixed spaced fonts) but with slight tweaks for sidebar 
+   ========================================================== */
+li.z2k-code  > a.menu__link {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: var(--ifm-code-font-size, 0.80rem);
+  letter-spacing: -0.02em;  /* mild width reduction without layout shift */
+}
+
+
 
 /* ==========================================================
    Support the REF_HTML sidebar link type
@@ -448,7 +460,7 @@ html[data-theme='dark'] {
 /* 1) Make the left docs sidebar narrower (fixed width, independent of longest item) */
 :root {
   /* Docusaurus default is ~300px. Try 240–260px; adjust to taste. */
-  --doc-sidebar-width: 240px;
+  --doc-sidebar-width: 260px;
   --doc-sidebar-hidden-width: 32px; /* width when collapsed (optional) */
 }
 
