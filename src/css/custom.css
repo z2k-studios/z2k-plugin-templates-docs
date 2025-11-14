@@ -257,7 +257,7 @@ html[data-theme='dark'] .token.hb-field.delimiter:not(:has(+ .token.hb-field)) {
   font-kerning: normal;                /* use kerning tables */
   font-variant-ligatures: common-ligatures contextual;
   text-rendering: optimizeLegibility;  /* fine to keep */
-  font-weight: 600;                    /* SF 600 feels less “puffy” than 700 */
+  font-weight: 650;                    /* SF 600 feels less “puffy” than 700 */
   line-height: 1.25;                   /* keep headings compact */
 }
 
@@ -366,8 +366,12 @@ html[data-theme='dark'] .token.hb-field.delimiter:not(:has(+ .token.hb-field)) {
 
 /* Tune these to taste */
 :root {
-  --h2-space-multiplier-top: 2;       /* ≈ two H2 line-heights above */
-  --h2-space-multiplier-bottom: 0.75; /* ≈ three-quarters line-height below */
+  /* Tune these to taste:
+     --h2-space-multiplier-top controls the total number of "line-heights" inserted above an H2.
+     --h2-sep-gap controls the distance between the separator line and the H2 text. */
+  --h2-space-multiplier-top: 2.0;       /* total space above H2 (in units of the H2 line-height) */
+  --h2-space-multiplier-bottom: 0.1;   /* three-quarters line-height below H2 */
+  --h2-sep-gap: 0.5em; /* distance from the heading text up to the separator line — tweak this */
 }
 
 /* Use existing Infima variables when present */
@@ -384,16 +388,30 @@ html[data-theme='dark'] .token.hb-field.delimiter:not(:has(+ .token.hb-field)) {
 
   /* Keep anchor scrolling sane with a sticky navbar present. If your navbar height differs, adjust 68px. */
   scroll-margin-top: clamp(68px, 5vh, 96px);
+
+  /* needed so the absolutely-positioned line (below) is positioned relative to each H2 */
+  position: relative;
 }
 
-/* Optional: defeat margin-collapsing with preceding blocks (lists, images).
-   This pseudo-element creates non-collapsing space “before” the H2 without affecting layout elsewhere. */
+/* Remove spacer-border approach and instead draw an absolute separator above the H2.
+   The --h2-sep-gap variable controls the distance between the line and the H2 text. */
 .theme-doc-markdown h2::before {
   content: "";
-  display: block;
-  height: calc((var(--h2-space-multiplier-top) - 1) * var(--_h2-lh) * 1em);
-  /* Pull the H2 back up so visual top stays the same; anchors still align nicely. */
-  margin-top: calc(-1 * (var(--h2-space-multiplier-top) - 1) * var(--_h2-lh) * 1em);
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px; /* line thickness */
+  /* place the line above the heading by the gap amount */
+  top: calc(-1 * var(--h2-sep-gap) - 1px);
+  background: rgba(0,0,0,0.16); /* light theme color — tweak alpha to darken/soften */
+  pointer-events: none;
+  /* keep the line from affecting layout (it sits in the margin area above the h2) */
+  z-index: 1;
+}
+
+/* Dark-theme variant: line color tuned for dark backgrounds */
+html[data-theme='dark'] .theme-doc-markdown h2::before {
+  background: rgba(255,255,255,0.14);
 }
 
 
