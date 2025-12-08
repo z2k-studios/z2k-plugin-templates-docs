@@ -416,6 +416,24 @@ html[data-theme='dark'] .theme-doc-markdown h2::before {
 
 
 /* ==========================================================
+   Embedded Images - Centering
+   ========================================================== */
+
+/* This is designed to center an embedded image withint the markdown content, 
+   specifically when the image is the only child of a paragraph. This occurs when 
+   the source Obsidian markdown places an image on its own line. When this is 
+   the case, the code below will center it.*/
+.theme-doc-markdown p > img:only-child {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ==========================================================
    Highlighted Text Styling
    - applies to <mark> and .z2k-mark
    ========================================================== */
