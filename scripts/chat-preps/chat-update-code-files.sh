@@ -23,16 +23,16 @@ COPY_ACTION=""
 
 # Edit the triplets below to register files for copying:
 typeset -a CODE_FILES=(
-  "$SRC_DEV_REPOS_ROOT/z2k-plugin-templates/main.tsx     | templates-plugin | +plugin-templates--main.tsx.txt | Main Templates Plugin source"
-  "$SRC_DEV_REPOS_ROOT/z2k-template-engine/src/main.ts   | templates-plugin | +template-engine--main.ts.txt   | Main Template Engine source"
+  "$SRC_DEV_REPOS_ROOT/z2k-plugin-templates/main.tsx     | templates-plugin | +plugin-templates--main.tsx.txt | Main Templates --Plugin-- source"
+  "$SRC_DEV_REPOS_ROOT/z2k-template-engine/src/main.ts   | templates-plugin | +template-engine--main.ts.txt   | Main Templates --Engine-- source"
 
-  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/step2-buildIndex.ts       | export-obsidian | export-obsidian--step2-buildIndex.ts.txt       | Step 2 - Build Index"
-  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/step3-writeSidebar.ts     | export-obsidian | export-obsidian--step3-writeSidebar.ts.txt     | Step 3 - Write Sidebar"
-  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/step5-remarkFiles.ts      | export-obsidian | export-obsidian--step5-remarkFiles.ts.txt      | Step 5 - Remark Files"
-  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/step6-writeConfigEmbed.ts | export-obsidian | export-obsidian--step6-writeConfigEmbed.ts.txt | Step 6 - Write Config Embed"
-  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/types.ts                  | export-obsidian | export-obsidian--types.ts.txt                  | types.ts"
-  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/utils.ts                  | export-obsidian | export-obsidian--utils.ts.txt                  | utils.ts"
-  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/utilsIndex.ts             | export-obsidian | export-obsidian--utilsIndex.ts.txt             | utilsIndex.ts"
+  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/step2-buildIndex.ts       | export-obsidian | export-obsidian--step2-buildIndex.ts.txt       | Step 2: Build Index"
+  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/step3-writeSidebar.ts     | export-obsidian | export-obsidian--step3-writeSidebar.ts.txt     | Step 3: Write Sidebar"
+  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/step5-remarkFiles.ts      | export-obsidian | export-obsidian--step5-remarkFiles.ts.txt      | Step 5: Remark and Copy Files"
+  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/step6-writeConfigEmbed.ts | export-obsidian | export-obsidian--step6-writeConfigEmbed.ts.txt | Step 6: Write Docusaurus Config Embed"
+  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/types.ts                  | export-obsidian | export-obsidian--types.ts.txt                  | Misc Code: types.ts"
+  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/utils.ts                  | export-obsidian | export-obsidian--utils.ts.txt                  | Misc Code: utils.ts"
+  "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/utilsIndex.ts             | export-obsidian | export-obsidian--utilsIndex.ts.txt             | Misc Code: utilsIndex.ts"
   "$SRC_MAIN_WORKSPACE_ROOT/Code/Javascript Scripts/export-obsidian-to-docusaurus/z2kRemarkPlugins.ts       | export-obsidian | export-obsidian--z2kRemarkPlugins.ts.txt       | Z2K Remark Plugins"
   
   "$SRC_MAIN_WORKSPACE_ROOT/Code/Obsidian Plugins/z2k-plugin-templates-docs/src/css/custom.css              | templates-docs  | z2k-plugin-templates-docs--custom.css.txt           | custom.css"

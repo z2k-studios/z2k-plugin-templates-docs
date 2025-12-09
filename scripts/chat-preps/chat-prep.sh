@@ -18,7 +18,11 @@ PROMPT_PREFACE_TEXT="Here is what I want you to work on for this chat:  "
 CHAT_UPDATE_CODE_SCRIPT="/Users/gp/Vaults/Z2K Studios Workspace/Code/Obsidian Plugins/z2k-plugin-templates-docs/scripts/chat-preps/chat-update-code-files.sh"
 DEFAULT_CODE_SET_TO_COPY="-templates-plugin"
 TOTAL_STEPS=5
-
+typeset -ga SELECTED_TARGET_LINKS=()
+typeset -ga SELECTED_TARGET_LINES=()
+typeset -ga SELECTED_TARGET_BASENAMES=()
+typeset -ga TARGET_FOUND_FILES=()
+typeset -gA TARGET_ORIGINAL_MAP=()
 
 # =================================================================================
 # =================================================================================
@@ -58,6 +62,50 @@ print_step_header() {
 
 strip_brackets() {
 	echo "$1" | sed -E 's/^\[\[//; s/\]\]$//'
+}
+
+choose_target_base() {
+	local prompt="${1:-"Select target"}" choice base
+	if (( ${#SELECTED_TARGET_BASENAMES[@]} == 0 )); then
+		printf "Enter the target filename (without .md): "
+		read -r base
+		base="${base%%.md}"
+		[[ -z "$base" ]] && return 1
+		REPLY="$base"
+		return 0
+	fi
+	if (( ${#SELECTED_TARGET_BASENAMES[@]} == 1 )); then
+		REPLY="${SELECTED_TARGET_BASENAMES[1]}"
+		return 0
+	fi
+	echo "$prompt"
+	local i=1
+	for base in "${SELECTED_TARGET_BASENAMES[@]}"; do
+		printf "  %d) %s.md\n" "$i" "$base"
+		(( i++ ))
+	done
+	while true; do
+		printf "Enter choice [1-%d] (m=manual, q=cancel): " "${#SELECTED_TARGET_BASENAMES[@]}"
+		read -r choice
+		case "$choice" in
+			[qQ]) return 1 ;;
+			[mM])
+				printf "Enter target filename (without .md): "
+				read -r base
+				base="${base%%.md}"
+				[[ -z "$base" ]] && return 1
+				REPLY="$base"
+				return 0
+				;;
+			*)
+				if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#SELECTED_TARGET_BASENAMES[@]} )); then
+					REPLY="${SELECTED_TARGET_BASENAMES[$choice]}"
+					return 0
+				fi
+				echo "Invalid choice."
+				;;
+		esac
+	done
 }
 
 prepare_destination_folder() {
@@ -138,31 +186,66 @@ step_select_document_target() {
 		(( i++ ))
 	done
 	echo
+	local selection_input
 	while true; do
-		if (( ${#toc_lines[@]} == 1 )); then
-			sel=1
-			echo "Only one match found; selecting 1."
-			break
+		printf "Enter the number(s) you want to work on [1-%d] (space-separated): " "${#toc_lines[@]}"
+		read -r selection_input
+		local -a selections=(${=selection_input})
+		if (( ${#selections[@]} == 0 )); then
+			echo "Invalid choice. Try again."
+			continue
 		fi
-		printf "Enter the number you want to work on [1-%d]: " "${#toc_lines[@]}"
-		read -r sel
-		if [[ "$sel" =~ ^[0-9]+$ ]] && (( sel >= 1 && sel <= ${#toc_lines[@]} )); then
+		local valid=1
+		for sel in "${selections[@]}"; do
+			if [[ "$sel" =~ ^[0-9]+$ ]] && (( sel >= 1 && sel <= ${#toc_lines[@]} )); then
+				continue
+			fi
+			valid=0
 			break
-		fi
+		done
+		(( valid )) && break
 		echo "Invalid choice. Try again."
 	done
-	toc_lines[$sel]=$(echo "${toc_lines[$sel]}" | sed -E 's/\[\[([^|\]#]+)[|#][^]]*\]\]/[[\1]]/g')
-	selected_line="${toc_lines[$sel]}"
-	selected_link="$(echo "$selected_line" | grep -oE '\[\[[^]]+\]\]' | head -n1 || true)"
-	if [ -n "$selected_link" ]; then
-		CHAT_TARGET="$selected_link"
-		echo "Selected link stored in $CHAT_TARGET:"
-		echo "--> $CHAT_TARGET <--"
-	else
-		CHAT_TARGET="$selected_line"
-		echo "No bracketed link found on selected line; stored entire line in $CHAT_TARGET:"
-		echo "--> $CHAT_TARGET <--"
-	fi
+
+	SELECTED_TARGET_LINKS=()
+	SELECTED_TARGET_LINES=()
+	SELECTED_TARGET_BASENAMES=()
+	for sel in "${selections[@]}"; do
+		local normalized_line link base
+		normalized_line="$(echo "${toc_lines[$sel]}" | sed -E 's/\[\[([^|\]#]+)[|#][^]]*\]\]/[[\1]]/g')"
+		link="$(echo "$normalized_line" | grep -oE '\[\[[^]]+\]\]' | head -n1 || true)"
+		if [ -n "$link" ]; then
+			base="$(echo "$link" | sed -E 's/^\[\[//; s/\]\]$//; s/[|#].*$//')"
+			SELECTED_TARGET_LINKS+=("$link")
+		else
+			base="$(echo "$normalized_line" | tr -cs 'A-Za-z0-9_- ' '_' | sed 's/^_//; s/_$//' | tr ' ' '_')"
+			SELECTED_TARGET_LINKS+=("")
+		fi
+		[[ -z "$base" ]] && base="target-$sel"
+		SELECTED_TARGET_BASENAMES+=("$base")
+		SELECTED_TARGET_LINES+=("$normalized_line")
+	done
+
+	selected_line="${SELECTED_TARGET_LINES[1]}"
+	selected_link="${SELECTED_TARGET_LINKS[1]}"
+	local summary_idx=1
+	local -a summary=()
+	for base in "${SELECTED_TARGET_BASENAMES[@]}"; do
+		local link="${SELECTED_TARGET_LINKS[summary_idx]}"
+		local line="${SELECTED_TARGET_LINES[summary_idx]}"
+		if [[ -n "$link" ]]; then
+			summary+=("$link")
+		else
+			summary+=("$line")
+		fi
+		(( summary_idx++ ))
+	end
+	CHAT_TARGET="$(IFS=', '; echo "${summary[*]}")"
+
+	echo "Working on target(s):"
+	for base in "${SELECTED_TARGET_BASENAMES[@]}"; do
+		echo "  - $base"
+	done
 }
 
 step_select_chat_prompt() {
@@ -209,10 +292,14 @@ step_configure_code_files() {
 
 step_confirm_chat_setup() {
 	print_step_header 5 "Confirm Chat Setup" "Review the selections below before continuing."
-	printf "Documentation Type  : %s\n" "$DOC_TYPE"
-	printf "Documentation Target: %s\n" "${CHAT_TARGET:-"(not set)"}"
-	printf "Documentation #     : %s\n" "$pf_sel"
-	printf "Prompt File         : %s\n\n" "$(basename "$PROMPT_DOC")"
+	local target_summary="(none)"
+	if (( ${#SELECTED_TARGET_BASENAMES[@]} )); then
+		target_summary="$(IFS=', '; echo "${SELECTED_TARGET_BASENAMES[*]}")"
+	fi
+	printf "Documentation Type      : %s\n" "$DOC_TYPE"
+	printf "Documentation Target(s) : %s\n" "$target_summary"
+	printf "Documentation #         : %s\n" "$pf_sel"
+	printf "Prompt File             : %s\n\n" "$(basename "$PROMPT_DOC")"
 	printf "Press Enter to continue..."
 	read -r _
 }
@@ -234,25 +321,27 @@ run_interactive_setup() {
 # =================================================================================
 # =================================================================================
 locate_existing_document() {
-	# The existing "selected_link" variable holds the [[...]] link to the document.
-	# We need to find the corresponding .md file in the DEST_ROOT folder.
-	if [ -n "${selected_link-}" ]; then
-		# Extract the filename from the [[...]] link by removing surrounding brackets and any '|' or '#' and everything after it.
-		doc_filename="$(echo "$selected_link" | sed -E 's/^\[\[//; s/\]\]$//; s/[|#].*$//')"
-		# Note: if the doc_filename exists, it could be in any of the subfolders of DEST_ROOT (actually, likely will be)
-		# Now try to find the file
-		found_file="$(find "$DEST_ROOT" -type f -name "${doc_filename}.md" 2>/dev/null | head -n1 || true)"
-		if [ -n "$found_file" ]; then
-			echo "Found existing document file for $selected_link :"
-			echo "--> $found_file <--"
-		else
-			echo "No existing document file found for $selected_link in $DEST_ROOT"
-		fi
-		ORIGINAL_DOC_PATH="$found_file"
-	else
+	TARGET_FOUND_FILES=()
+	TARGET_ORIGINAL_MAP=()
+	if (( ${#SELECTED_TARGET_BASENAMES[@]} == 0 )); then
 		echo "No selected link to find existing document for."
 		ORIGINAL_DOC_PATH=""
+		found_file=""
+		return
 	fi
+	for base in "${SELECTED_TARGET_BASENAMES[@]}"; do
+		local found
+		found="$(find "$DEST_ROOT" -type f -name "${base}.md" 2>/dev/null | head -n1 || true)"
+		TARGET_FOUND_FILES+=("$found")
+		TARGET_ORIGINAL_MAP["$base"]="$found"
+		if [ -n "$found" ]; then
+			printf "Found existing document file for %s :\n--> %s <--\n" "$base" "$found"
+		else
+			printf "No existing document file found for %s in %s\n" "$base" "$DEST_ROOT"
+		fi
+	done
+	ORIGINAL_DOC_PATH="${TARGET_FOUND_FILES[1]:-}"
+	found_file="$ORIGINAL_DOC_PATH"
 }
 
 run_prechecks() {
@@ -270,12 +359,11 @@ prepare_chat_payload() {
 	CHAT_TOC_DEST="$DEST_PATH_DESKTOP_CHAT/$DOC_TYPE - TOC.md"
 	cp -f "$PROMPT_DOC" "$CHAT_PROMPT_DEST"
 	cp -f "$PROMPT_TOC" "$CHAT_TOC_DEST"
-	if [ -n "${found_file-}" ] && [ -f "$found_file" ]; then
-		# existing_doc_copy="$DEST_PATH_DESKTOP_CHAT/$DOC_TYPE - Existing Document.md"
-		# cp -f -- "$found_file" "$existing_doc_copy"
-		cp -f -- "$found_file" "$DEST_PATH_DESKTOP_CHAT/$(basename "$found_file")"
-		echo "Copied existing document into ChatGPT Files."
-	fi
+	for found in "${TARGET_FOUND_FILES[@]}"; do
+		[ -n "$found" ] && [ -f "$found" ] || continue
+		cp -f -- "$found" "$DEST_PATH_DESKTOP_CHAT/$(basename "$found")"
+		echo "Copied existing document into ChatGPT Files: $(basename "$found")"
+	done
 
 	# Append instructions (FULL_PROMPT) to the prompt doc file
 	printf '\n\n---\n\n%s\n' "$FULL_PROMPT" >> "$CHAT_PROMPT_DEST"
@@ -356,111 +444,105 @@ EOF
 }
 
 perform_copy() {
-  local dest_folder="${1:-$DEST_INBOX}"
-  # Determine base filename
-  if [ -n "${selected_link-}" ]; then
-    base="$(strip_brackets "$selected_link")"
-    echo "Using extracted link name: $base"
-  else
-    # No link extracted; ask user for the filename
-    printf "No link was extracted. Enter the target filename (without .md): "
-    read -r base
-    base="${base%%.md}" # strip accidental .md suffix
-  fi
+	local dest_folder="${1:-$DEST_INBOX}"
+	if ! choose_target_base "Select the target you want to copy"; then
+		echo "Copy cancelled."
+		return
+	fi
+	local base="${REPLY%%.md}"
+	[[ -z "$base" ]] && { echo "No target specified."; return; }
+	echo "Using target name: $base"
 
-  src="$DEST_PATH_DOWNLOADS/${base}.md"
-  dest="$dest_folder/${base}.md"
+	local src="$DEST_PATH_DOWNLOADS/${base}.md"
+	local dest="$dest_folder/${base}.md"
 
-  # Tell the user what we are doing
-  echo
-  echo "Preparing to copy:"
-  echo "SRC :: $src"
-  echo "DEST :: $dest"
-  echo
+	# Tell the user what we are doing
+	echo
+	echo "Preparing to copy:"
+	echo "SRC :: $src"
+	echo "DEST :: $dest"
+	echo
 
-  # If source missing, allow user to provide alternative or cancel
-  if [ ! -f "$src" ]; then
-    echo "Ah shoot, source file not found: $src"
-    printf "Enter alternative filename (without .md) or N to cancel: "
-    read -r alt
-    if [[ "$alt" =~ ^[Nn]$ ]]; then
-      echo "Copy cancelled by user."
-      return
-    else
-      base="${alt%%.md}"
-      src="$DEST_PATH_DOWNLOADS/${base}.md"
-      dest="$dest_folder/${base}.md"
-    fi
-  fi
+	# If source missing, allow user to provide alternative or cancel
+	if [ ! -f "$src" ]; then
+		echo "Ah shoot, source file not found: $src"
+		printf "Enter alternative filename (without .md) or N to cancel: "
+		read -r alt
+		if [[ "$alt" =~ ^[Nn]$ ]]; then
+			echo "Copy cancelled by user."
+			return
+		else
+			base="${alt%%.md}"
+			src="$DEST_PATH_DOWNLOADS/${base}.md"
+			dest="$dest_folder/${base}.md"
+		fi
+	fi
 
-  # If still missing, abort this copy attempt
-  if [ ! -f "$src" ]; then
-    echo "No valid source file found. Skipping copy."
-    return
-  fi
+	# If still missing, abort this copy attempt
+	if [ ! -f "$src" ]; then
+		echo "No valid source file found. Skipping copy."
+		return
+	fi
 
-  # Resolve destination collision by appending _vN
-  dest_final="$dest"
-  if [ -f "$dest_final" ]; then
-    n=2
-    while [ -f "${DEST_INBOX}/${base}_v${n}.md" ]; do
-      n=$((n+1))
-    done
-    dest_final="${DEST_INBOX}/${base}_v${n}.md"
-  fi
+	# Resolve destination collision by appending _vN
+	dest_final="$dest"
+	if [ -f "$dest_final" ]; then
+		local n=2
+		while [ -f "${dest_folder}/${base}_v${n}.md" ]; do
+			n=$((n+1))
+		done
+		dest_final="${dest_folder}/${base}_v${n}.md"
+	fi
 
-  # Confirm and copy
-  echo
-  echo "Just to be sure, I am copying:"
-  echo "SRC :: $src"
-  echo "DEST :: $dest_final"
-  printf "Proceed? (Y/N) : "
-  read -r proceed
-  if [[ "$proceed" =~ ^[Yy]$ ]]; then
-    if cp -f -- "$src" "$dest_final"; then
-      echo "Copied to: $dest_final"
-    else
-      echo "Copy failed."
-    fi
-  else
-    echo "Copy aborted by user."
-  fi
+	# Confirm and copy
+	echo
+	echo "Just to be sure, I am copying:"
+	echo "SRC :: $src"
+	echo "DEST :: $dest_final"
+	printf "Proceed? (Y/N) : "
+	read -r proceed
+	if [[ "$proceed" =~ ^[Yy]$ ]]; then
+		if cp -f -- "$src" "$dest_final"; then
+			echo "Copied to: $dest_final"
+		else
+			echo "Copy failed."
+		fi
+	else
+		echo "Copy aborted by user."
+	fi
 }
 
 perform_diff() {
-  local new_root="${1:-$DEST_PATH_DOWNLOADS}"
-   # Determine base filename
-   if [ -n "${selected_link-}" ]; then
- 	base="$(strip_brackets "$selected_link")"
- 	echo "Using extracted link name: $base"
-   else
- 	# No link extracted; ask user for the filename
- 	printf "No link was extracted. Enter the target filename (without .md): "
-	read -r base
-	base="${base%%.md}" # strip accidental .md suffix
-   fi
+	local new_root="${1:-$DEST_PATH_DOWNLOADS}"
+	if ! choose_target_base "Select the target for diffing"; then
+		echo "Diff cancelled."
+		return
+	fi
+	local base="${REPLY%%.md}"
+	[[ -z "$base" ]] && { echo "No target specified."; return; }
 
-  src="$new_root/${base}.md"
-  if [ ! -f "$src" ]; then
-	echo "New file not found: $src"
-	return
-  fi
-  orig="${ORIGINAL_DOC_PATH:-}"
-  if [ -z "$orig" ] || [ ! -f "$orig" ]; then
-	orig="$(find "$DEST_ROOT" -type f -name "${base}.md" 2>/dev/null | head -n1 || true)"
-  fi
-  if [ -z "$orig" ] || [ ! -f "$orig" ]; then
-	echo "Original file not found in $DEST_ROOT"
-	return
-  fi
-  code --diff "$src" "$orig"
+	local src="$new_root/${base}.md"
+	if [ ! -f "$src" ]; then
+		echo "New file not found: $src"
+		return
+	fi
+	local orig="${TARGET_ORIGINAL_MAP[$base]:-}"
+	if [ -z "$orig" ] || [ ! -f "$orig" ]; then
+		orig="$(find "$DEST_ROOT" -type f -name "${base}.md" 2>/dev/null | head -n1 || true)"
+	fi
+	if [ -z "$orig" ] || [ ! -f "$orig" ]; then
+		echo "Original file not found in $DEST_ROOT"
+		return
+	fi
+	code --diff "$src" "$orig"
 }
 
 post_chat_menu_loop() {
-	local base
-	if [ -n "${selected_link-}" ]; then
-		base="$(strip_brackets "$selected_link")"
-		echo "Downloaded Filename: '${base}.md'"
+	if (( ${#SELECTED_TARGET_BASENAMES[@]} )); then
+		echo "Downloaded Filenames:"
+		for base in "${SELECTED_TARGET_BASENAMES[@]}"; do
+			echo "  - ${base}.md"
+		done
 	else
 		echo "Downloaded Filename: (oops, I'll need you to help me with the filename)"
 	fi
@@ -484,9 +566,11 @@ post_chat_menu_loop() {
 		echo "  7) Start a new document"
 		echo "  8) Quit"
 		echo
-		echo "Note: I'll start by looking for a file named like this in your Downloads folder:"
-		if [ -n "${selected_link-}" ]; then
-			echo "  ${base}.md"
+		echo "Note: I'll start by looking for file(s) named like this in your Downloads folder:"
+		if (( ${#SELECTED_TARGET_BASENAMES[@]} )); then
+			for base in "${SELECTED_TARGET_BASENAMES[@]}"; do
+				echo "  ${base}.md"
+			done
 		else
 			echo "  (oops, I'll need you to help me with the filename)"
 		fi
