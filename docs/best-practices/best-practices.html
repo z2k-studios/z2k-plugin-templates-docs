@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
 <title data-rh="true">Overview | Z2K Templates</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://z2k-studios.github.io/z2k-plugin-templates-docs/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://z2k-studios.github.io/z2k-plugin-templates-docs/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://z2k-studios.github.io/z2k-plugin-templates-docs/docs/best-practices/best-practices"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Overview | Z2K Templates"><meta data-rh="true" name="description" content="Welcome to the Best Practices section for Z2K Templates. Included below are various guides to help you set up, configure, and use Z2K Templates effectively. The plugin is very powerful, but with the power, templates can quickly become unwieldy in their use. These best practices give you real world advice on how to manage your templates."><meta data-rh="true" property="og:description" content="Welcome to the Best Practices section for Z2K Templates. Included below are various guides to help you set up, configure, and use Z2K Templates effectively. The plugin is very powerful, but with the power, templates can quickly become unwieldy in their use. These best practices give you real world advice on how to manage your templates."><link data-rh="true" rel="icon" href="/z2k-plugin-templates-docs/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://z2k-studios.github.io/z2k-plugin-templates-docs/docs/best-practices/best-practices"><link data-rh="true" rel="alternate" href="https://z2k-studios.github.io/z2k-plugin-templates-docs/docs/best-practices/best-practices" hreflang="en"><link data-rh="true" rel="alternate" href="https://z2k-studios.github.io/z2k-plugin-templates-docs/docs/best-practices/best-practices" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Overview","item":"https://z2k-studios.github.io/z2k-plugin-templates-docs/docs/best-practices/best-practices"}]}</script><link rel="alternate" type="application/rss+xml" href="/z2k-plugin-templates-docs/blog/rss.xml" title="Z2K Templates RSS Feed">
-<link rel="alternate" type="application/atom+xml" href="/z2k-plugin-templates-docs/blog/atom.xml" title="Z2K Templates Atom Feed"><link rel="stylesheet" href="/z2k-plugin-templates-docs/assets/css/styles.3f4bbc8e.css">
-<script src="/z2k-plugin-templates-docs/assets/js/runtime~main.afbad365.js" defer="defer"></script>
-<script src="/z2k-plugin-templates-docs/assets/js/main.dc606f48.js" defer="defer"></script>
+<link rel="alternate" type="application/atom+xml" href="/z2k-plugin-templates-docs/blog/atom.xml" title="Z2K Templates Atom Feed"><link rel="stylesheet" href="/z2k-plugin-templates-docs/assets/css/styles.b0b4baf3.css">
+<script src="/z2k-plugin-templates-docs/assets/js/runtime~main.db77df34.js" defer="defer"></script>
+<script src="/z2k-plugin-templates-docs/assets/js/main.7184d3ab.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
 <svg style="display: none;"><defs>
@@ -16,15 +16,43 @@
 <p>Welcome to the <strong>Best Practices</strong> section for <a class="" href="/z2k-plugin-templates-docs/readme">Z2K Templates</a>. Included below are various guides to help you set up, configure, and use Z2K Templates effectively. The plugin is very powerful, but with the power, templates can quickly become unwieldy in their use. These best practices give you real world advice on how to manage your templates.</p>
 <hr>
 <ul>
-<li class="">Embedded vs External Template Folders - How to Decide</li>
-<li class="">How to Make Use of Hierarchical YAML text</li>
-<li class="">How and When to Use Partials</li>
-<li class="">Case sensitivity and field names</li>
-<li class="">How to organize your field-infos in your template files</li>
-<li class="">A Guide to Making Your Templates Modular<!-- -->
+<li class="">
+<p>What Makes for a Good Template?</p>
+<ul>
+<li class="">DRY</li>
+<li class="">Cluster <code>{{fieldInfo}}</code>&#x27;s at the top or bottom</li>
+<li class=""></li>
+</ul>
+</li>
+<li class="">
+<p>Embedded vs External Template Folders - How to Decide</p>
+</li>
+<li class="">
+<p>How to Make Use of Hierarchical YAML text</p>
+</li>
+<li class="">
+<p>How and When to Use Partials</p>
+</li>
+<li class="">
+<p>Case sensitivity and field names</p>
+</li>
+<li class="">
+<p>How to organize your fieldInfos in your template files</p>
+</li>
+<li class="">
+<p>A Guide to Making Your Templates Modular</p>
 <ul>
 <li class="">Steps through how to use partials for creating common sections, discusses the benefits</li>
 <li class="">Also, step through how the modular sections can be stored at different hierarchical levels.</li>
+</ul>
+</li>
+<li class="">
+<p>What Makes a good Templating System for a Vault</p>
+<ul>
+<li class="">Describe how to build hierarchical system Yaml code (overwrite property values?)</li>
+<li class="">Use of partials - and naming to include partials that are folder specific</li>
+<li class="">Use of predefined variables to clean up template text.</li>
+<li class="">Maybe categorize techniques as advanced or intermediate.</li>
 </ul>
 </li>
 </ul>
@@ -34,6 +62,6 @@
 <li class="">When to use <code>preserve</code> vs <code>clear</code></li>
 <li class="">Structuring Prompts for Usability</li>
 <li class="">Naming Conventions for Variables</li>
-</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#11-best-practices" class="table-of-contents__link toc-highlight">11. Best Practices</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/z2k-plugin-templates-docs/docs/readme">Intro</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://stackoverflow.com/questions/tagged/docusaurus" target="_blank" rel="noopener noreferrer" class="footer__link-item">Stack Overflow<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://discordapp.com/invite/docusaurus" target="_blank" rel="noopener noreferrer" class="footer__link-item">Discord<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://x.com/docusaurus" target="_blank" rel="noopener noreferrer" class="footer__link-item">X<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/z2k-plugin-templates-docs/blog">Blog</a></li><li class="footer__item"><a href="https://github.com/facebook/docusaurus" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2025 Z2K Studios LLC.</div></div></div></footer></div>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#11-best-practices" class="table-of-contents__link toc-highlight">11. Best Practices</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/z2k-plugin-templates-docs/docs/readme">Intro</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://stackoverflow.com/questions/tagged/docusaurus" target="_blank" rel="noopener noreferrer" class="footer__link-item">Stack Overflow<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://discordapp.com/invite/docusaurus" target="_blank" rel="noopener noreferrer" class="footer__link-item">Discord<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://x.com/docusaurus" target="_blank" rel="noopener noreferrer" class="footer__link-item">X<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/z2k-plugin-templates-docs/blog">Blog</a></li><li class="footer__item"><a href="https://github.com/facebook/docusaurus" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Z2K Studios LLC.</div></div></div></footer></div>
 </body>
 </html>
