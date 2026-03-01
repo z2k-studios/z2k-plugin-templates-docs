@@ -107,8 +107,36 @@ fi
 if [[ $DO_UPDATE -eq 1 ]]; then
   echo "Ensuring ${PACKAGE_SPEC} is installed (this is fast if already up to date)…"
   # Using npm install (not 'update') forces resolution to the channel/version you asked for
-  npm install --save-dev "${PACKAGE_SPEC}" \
-    || { echo "npm install failed; check .npmrc/registry/auth." >&2; exit 1; }
+  npm install --save-dev "${PACKAGE_SPEC}" || {
+    cat >&2 <<'EOF'
+
+npm install failed. If the error was "401 Unauthorized", your GitHub PAT has likely
+expired (tokens set to 90-day expiry do this every three months).
+
+To fix:
+
+  1. Generate a new token at: https://github.com/settings/tokens
+     → "Generate new token (classic)" → grant the "read:packages" scope.
+
+  2. Edit ~/.npmrc directly (do NOT use "npm config set --global" — it writes to a
+     different file that ~/.npmrc silently overrides):
+
+       nano ~/.npmrc
+
+     Replace the _authToken line with your new token:
+
+       //npm.pkg.github.com/:_authToken=<your-new-token>
+
+  3. Verify the token works before re-running this script:
+
+       curl -s -o /dev/null -w "%{http_code}" \
+         -H "Authorization: token <your-new-token>" \
+         https://npm.pkg.github.com/@z2k-studios%2fexport-obsidian-to-docusaurus
+       # Should print 200
+
+EOF
+    exit 1
+  }
 fi
 
 # If we’re only bootstrapping, we’re done
